@@ -1,0 +1,33 @@
+# Python caches and virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# IDE and OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Local environment files
+.env
+.env.*
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Large local data and trained model artifacts
+data/raw/*.pickle
+data/raw/*.pkl
+data/raw/*.csv
+data/processed/*.csv
+models/*.pkl
+models/*.joblib
+
+# Logs and temporary outputs
+*.log
+tmp/
+temp/
