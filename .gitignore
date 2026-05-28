@@ -31,3 +31,4 @@ models/*.joblib
 *.log
 tmp/
 temp/
+reports/error_analysis.csv

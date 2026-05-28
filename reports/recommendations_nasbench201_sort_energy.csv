@@ -1,0 +1,11 @@
+search_space,dataset,arch_id,device,predicted_latency,predicted_energy,arch_name,base_channels,num_cells,num_classes,op_count_avg_pool_3x3,op_count_nor_conv_1x1,op_count_nor_conv_3x3,op_count_skip_connect,op_count_none,arch_str
+nasbench201,ImageNet16-120,97,eyeriss,0.5712004027089039,0.00019033417504475396,infer.tiny,16,5,120,0,1,0,2,3,|nor_conv_1x1~0|+|none~0|skip_connect~1|+|none~0|skip_connect~1|none~2|
+nasbench201,ImageNet16-120,201,eyeriss,0.5712004027089039,0.00019033417504475396,infer.tiny,16,5,120,0,1,0,2,3,|skip_connect~0|+|nor_conv_1x1~0|none~1|+|none~0|skip_connect~1|none~2|
+nasbench201,ImageNet16-120,375,eyeriss,0.5712004027089039,0.00019033417504475396,infer.tiny,16,5,120,0,1,0,2,3,|skip_connect~0|+|none~0|none~1|+|skip_connect~0|nor_conv_1x1~1|none~2|
+nasbench201,ImageNet16-120,426,eyeriss,0.5712004027089039,0.00019033417504475396,infer.tiny,16,5,120,0,1,0,2,3,|none~0|+|skip_connect~0|nor_conv_1x1~1|+|none~0|skip_connect~1|none~2|
+nasbench201,ImageNet16-120,798,eyeriss,0.5712004027089039,0.00019033417504475396,infer.tiny,16,5,120,0,1,0,2,3,|skip_connect~0|+|none~0|skip_connect~1|+|none~0|none~1|nor_conv_1x1~2|
+nasbench201,ImageNet16-120,894,eyeriss,0.5712004027089039,0.00019033417504475396,infer.tiny,16,5,120,0,1,0,2,3,|none~0|+|none~0|none~1|+|nor_conv_1x1~0|skip_connect~1|skip_connect~2|
+nasbench201,ImageNet16-120,1141,eyeriss,0.5712004027089039,0.00019033417504475396,infer.tiny,16,5,120,0,1,0,2,3,|none~0|+|none~0|skip_connect~1|+|nor_conv_1x1~0|none~1|skip_connect~2|
+nasbench201,ImageNet16-120,1188,eyeriss,0.5712004027089039,0.00019033417504475396,infer.tiny,16,5,120,0,1,0,2,3,|none~0|+|skip_connect~0|none~1|+|nor_conv_1x1~0|skip_connect~1|none~2|
+nasbench201,ImageNet16-120,1435,eyeriss,0.5712004027089039,0.00019033417504475396,infer.tiny,16,5,120,0,1,0,2,3,|none~0|+|nor_conv_1x1~0|skip_connect~1|+|none~0|none~1|skip_connect~2|
+nasbench201,ImageNet16-120,1593,eyeriss,0.5712004027089039,0.00019033417504475396,infer.tiny,16,5,120,0,1,0,2,3,|skip_connect~0|+|skip_connect~0|none~1|+|none~0|none~1|nor_conv_1x1~2|

@@ -1,0 +1,45 @@
+{
+  "search_space": "fbnet",
+  "dataset": "data\\processed\\hwnasbench_fbnet.csv",
+  "rows_total": 1125,
+  "rows_used": 960,
+  "target": "latency",
+  "features": {
+    "categorical": [
+      "device"
+    ],
+    "numeric": [
+      "input_h",
+      "input_w",
+      "cin",
+      "cout",
+      "expansion",
+      "kernel",
+      "stride",
+      "group"
+    ]
+  },
+  "test_size": 0.2,
+  "random_state": 42,
+  "results": [
+    {
+      "model": "linear_regression",
+      "mae": 1.6743622725566942,
+      "rmse": 3.8156735804498947,
+      "mape_percent": 584.9497148952906
+    },
+    {
+      "model": "gradient_boosting",
+      "mae": 0.6602623241600906,
+      "rmse": 2.148597437191828,
+      "mape_percent": 96.7135308050362
+    },
+    {
+      "model": "neural_network_mlp",
+      "mae": 0.5622448375745206,
+      "rmse": 1.6135438067441272,
+      "mape_percent": 86.57978771992934
+    }
+  ],
+  "best_model": "neural_network_mlp"
+}

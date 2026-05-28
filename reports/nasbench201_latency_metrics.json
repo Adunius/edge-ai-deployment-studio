@@ -1,0 +1,46 @@
+{
+  "search_space": "nasbench201",
+  "dataset": "data\\processed\\hwnasbench_nasbench201.csv",
+  "rows_total": 281250,
+  "rows_used": 267153,
+  "target": "latency",
+  "features": {
+    "categorical": [
+      "dataset",
+      "device"
+    ],
+    "numeric": [
+      "base_channels",
+      "num_cells",
+      "num_classes",
+      "op_count_avg_pool_3x3",
+      "op_count_nor_conv_1x1",
+      "op_count_nor_conv_3x3",
+      "op_count_skip_connect",
+      "op_count_none"
+    ]
+  },
+  "test_size": 0.2,
+  "random_state": 42,
+  "results": [
+    {
+      "model": "linear_regression",
+      "mae": 3.979042989220378,
+      "rmse": 6.043251565677186,
+      "mape_percent": 455.1664350721886
+    },
+    {
+      "model": "gradient_boosting",
+      "mae": 0.8746450557047186,
+      "rmse": 2.158862160535716,
+      "mape_percent": 187.25001566689065
+    },
+    {
+      "model": "neural_network_mlp",
+      "mae": 0.8699560598142876,
+      "rmse": 2.157104134388665,
+      "mape_percent": 185.8890278309157
+    }
+  ],
+  "best_model": "neural_network_mlp"
+}

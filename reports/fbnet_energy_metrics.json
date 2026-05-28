@@ -1,0 +1,45 @@
+{
+  "search_space": "fbnet",
+  "dataset": "data\\processed\\hwnasbench_fbnet.csv",
+  "rows_total": 1125,
+  "rows_used": 576,
+  "target": "energy",
+  "features": {
+    "categorical": [
+      "device"
+    ],
+    "numeric": [
+      "input_h",
+      "input_w",
+      "cin",
+      "cout",
+      "expansion",
+      "kernel",
+      "stride",
+      "group"
+    ]
+  },
+  "test_size": 0.2,
+  "random_state": 42,
+  "results": [
+    {
+      "model": "linear_regression",
+      "mae": 6.466960883738091,
+      "rmse": 8.764289572981355,
+      "mape_percent": 3179.11080354001
+    },
+    {
+      "model": "gradient_boosting",
+      "mae": 2.5713788049932473,
+      "rmse": 4.979208464986705,
+      "mape_percent": 430.798375000526
+    },
+    {
+      "model": "neural_network_mlp",
+      "mae": 3.3152581793281666,
+      "rmse": 6.369061406644997,
+      "mape_percent": 818.5813549305992
+    }
+  ],
+  "best_model": "gradient_boosting"
+}

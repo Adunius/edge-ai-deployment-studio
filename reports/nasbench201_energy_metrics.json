@@ -1,8 +1,9 @@
 {
+  "search_space": "nasbench201",
   "dataset": "data\\processed\\hwnasbench_nasbench201.csv",
   "rows_total": 281250,
-  "rows_used": 267153,
-  "target": "latency",
+  "rows_used": 140625,
+  "target": "energy",
   "features": {
     "categorical": [
       "dataset",
@@ -20,24 +21,25 @@
     ]
   },
   "test_size": 0.2,
+  "random_state": 42,
   "results": [
     {
       "model": "linear_regression",
-      "mae": 3.979042989220378,
-      "rmse": 6.043251565677186,
-      "mape_percent": 455.1664350721886
+      "mae": 4.509751138406779,
+      "rmse": 5.624308466724695,
+      "mape_percent": 330.8125121099977
     },
     {
       "model": "gradient_boosting",
-      "mae": 0.8746450557047186,
-      "rmse": 2.158862160535716,
-      "mape_percent": 187.25001566689065
+      "mae": 1.0955916594256678,
+      "rmse": 2.35549612478362,
+      "mape_percent": 10.204279022561371
     },
     {
       "model": "neural_network_mlp",
-      "mae": 0.8759128520137507,
-      "rmse": 2.1567252437530104,
-      "mape_percent": 184.20951445237705
+      "mae": 1.1620124893488346,
+      "rmse": 2.360492104223072,
+      "mape_percent": 13.921199381314347
     }
   ],
   "best_model": "gradient_boosting"

@@ -1,0 +1,6 @@
+search_space,dataset,arch_id,device,predicted_latency,predicted_energy,arch_name,base_channels,num_cells,num_classes,op_count_avg_pool_3x3,op_count_nor_conv_1x1,op_count_nor_conv_3x3,op_count_skip_connect,op_count_none,arch_str
+nasbench201,ImageNet16-120,3043,edgetpu,0.010480918012119866,3.2836487558268606,infer.tiny,16,5,120,0,1,0,0,5,|none~0|+|none~0|none~1|+|nor_conv_1x1~0|none~1|none~2|
+nasbench201,ImageNet16-120,8133,edgetpu,0.010480918012119866,3.2836487558268606,infer.tiny,16,5,120,0,1,0,0,5,|none~0|+|none~0|none~1|+|none~0|none~1|nor_conv_1x1~2|
+nasbench201,ImageNet16-120,8792,edgetpu,0.010480918012119866,3.2836487558268606,infer.tiny,16,5,120,0,1,0,0,5,|none~0|+|nor_conv_1x1~0|none~1|+|none~0|none~1|none~2|
+nasbench201,ImageNet16-120,11908,edgetpu,0.010480918012119866,3.2836487558268606,infer.tiny,16,5,120,0,1,0,0,5,|none~0|+|none~0|nor_conv_1x1~1|+|none~0|none~1|none~2|
+nasbench201,ImageNet16-120,13324,edgetpu,0.010480918012119866,3.2836487558268606,infer.tiny,16,5,120,0,1,0,0,5,|none~0|+|none~0|none~1|+|none~0|nor_conv_1x1~1|none~2|

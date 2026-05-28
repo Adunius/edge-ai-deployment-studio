@@ -1,0 +1,11 @@
+search_space,block_id,device,predicted_latency,predicted_energy,input_h,input_w,cin,cout,expansion,kernel,stride,group,block_name
+fbnet,181,eyeriss,0.0042288480069304635,0.019353130538698516,4.0,4.0,184.0,184.0,1.0,5.0,1.0,2.0,ConvBlock_H4_W4_Cin184_Cout184_exp1_kernel5_stride1_group2
+fbnet,94,eyeriss,0.004330218196054503,1.0855979578290433,7.0,7.0,184.0,352.0,3.0,5.0,1.0,1.0,ConvBlock_H7_W7_Cin184_Cout352_exp3_kernel5_stride1_group1
+fbnet,186,eyeriss,0.005250501215201209,0.4919933984434402,4.0,4.0,184.0,352.0,3.0,3.0,1.0,1.0,ConvBlock_H4_W4_Cin184_Cout352_exp3_kernel3_stride1_group1
+fbnet,156,eyeriss,0.006046173410502148,0.24980927360818772,8.0,8.0,64.0,112.0,1.0,5.0,1.0,1.0,ConvBlock_H8_W8_Cin64_Cout112_exp1_kernel5_stride1_group1
+fbnet,40,fpga,0.006646162998083738,3.814430373936893,28.0,28.0,32.0,64.0,1.0,3.0,2.0,1.0,ConvBlock_H28_W28_Cin32_Cout64_exp1_kernel3_stride2_group1
+fbnet,44,fpga,0.006998618684972091,3.9675402784855245,28.0,28.0,32.0,64.0,1.0,5.0,2.0,1.0,ConvBlock_H28_W28_Cin32_Cout64_exp1_kernel5_stride2_group1
+fbnet,185,eyeriss,0.007319492358205504,0.003646165309676746,4.0,4.0,184.0,352.0,1.0,3.0,1.0,2.0,ConvBlock_H4_W4_Cin184_Cout352_exp1_kernel3_stride1_group2
+fbnet,48,eyeriss,0.011304196842234826,0.44254144072862206,14.0,14.0,64.0,64.0,1.0,3.0,1.0,1.0,ConvBlock_H14_W14_Cin64_Cout64_exp1_kernel3_stride1_group1
+fbnet,33,eyeriss,0.015873342268300727,0.2781131635394088,28.0,28.0,32.0,32.0,1.0,3.0,1.0,2.0,ConvBlock_H28_W28_Cin32_Cout32_exp1_kernel3_stride1_group2
+fbnet,133,fpga,0.02036390775223651,0.6704573670166195,16.0,16.0,32.0,32.0,1.0,5.0,1.0,2.0,ConvBlock_H16_W16_Cin32_Cout32_exp1_kernel5_stride1_group2
