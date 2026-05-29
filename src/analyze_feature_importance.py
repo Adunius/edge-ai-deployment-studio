@@ -1,3 +1,5 @@
+"""Оцінювання важливості ознак для NASBench201 latency через permutation importance."""
+
 from __future__ import annotations
 
 import pickle
@@ -54,6 +56,7 @@ def main() -> None:
     )
 
     if len(x_test) > MAX_ROWS:
+        # Обмеження вибірки пришвидшує permutation importance на великому NASBench201 CSV.
         x_sample = x_test.sample(n=MAX_ROWS, random_state=RANDOM_STATE)
         y_sample = y_test.loc[x_sample.index]
     else:
@@ -64,6 +67,7 @@ def main() -> None:
         pipeline = pickle.load(file)
 
     importance = permutation_importance(
+        # scoring="neg_mean_absolute_error" дає приріст MAE після руйнування ознаки.
         pipeline,
         x_sample,
         y_sample,

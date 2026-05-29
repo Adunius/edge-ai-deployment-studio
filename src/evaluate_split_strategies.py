@@ -1,3 +1,5 @@
+"""Порівняння різних train/test split-стратегій для NASBench201 latency."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -33,6 +35,7 @@ RANDOM_STATE = 42
 
 
 def build_model() -> Pipeline:
+    # Для split-експериментів використовується однакова boosting-модель.
     preprocessor = ColumnTransformer(
         transformers=[
             ("categorical", OneHotEncoder(handle_unknown="ignore"), CATEGORICAL_FEATURES),
@@ -95,6 +98,7 @@ def random_split(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
 
 
 def architecture_split(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+    # Архітектури в test не потрапляють у train, тому перевіряється узагальнення на нові arch_id.
     arch_ids = pd.Series(df["arch_id"].unique())
     train_arch_ids, test_arch_ids = train_test_split(
         arch_ids,
@@ -121,6 +125,7 @@ def main() -> None:
     results.append(evaluate_split("architecture", train_df, test_df))
 
     for device in sorted(df["device"].unique()):
+        # Device split моделює перенесення на пристрій, якого не було під час навчання.
         train_df = df[df["device"] != device].copy()
         test_df = df[df["device"] == device].copy()
         results.append(evaluate_split("device", train_df, test_df, test_group=device))

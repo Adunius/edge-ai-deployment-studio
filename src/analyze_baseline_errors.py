@@ -1,3 +1,5 @@
+"""Аналіз помилок baseline-моделі NASBench201 latency за групами."""
+
 from __future__ import annotations
 
 import pickle
@@ -35,6 +37,7 @@ def rmse(y_true: pd.Series, y_pred: pd.Series) -> float:
 
 
 def summarize_errors(df: pd.DataFrame, group_columns: list[str]) -> pd.DataFrame:
+    # Агрегація за device або dataset допомагає знайти найскладніші підмножини.
     rows = []
     for group_values, group in df.groupby(group_columns):
         if not isinstance(group_values, tuple):
@@ -80,6 +83,7 @@ def main() -> None:
         random_state=RANDOM_STATE,
     )
 
+    # Використовується той самий random_state, що й під час навчання baseline-моделі.
     with MODEL_PATH.open("rb") as file:
         model = pickle.load(file)
 
@@ -88,6 +92,7 @@ def main() -> None:
     error_analysis = df.loc[x_test.index, ["dataset", "arch_id", "device", "arch_str"]].copy()
     error_analysis["actual_latency"] = y_test
     error_analysis["predicted_latency"] = predictions
+    # Додатна помилка означає, що модель переоцінює latency.
     error_analysis["error"] = error_analysis["predicted_latency"] - error_analysis["actual_latency"]
     error_analysis["absolute_error"] = error_analysis["error"].abs()
     error_analysis["squared_error"] = error_analysis["error"] ** 2

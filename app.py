@@ -1,3 +1,5 @@
+"""Streamlit-інтерфейс для перегляду результатів і підбору конфігурацій."""
+
 from __future__ import annotations
 
 import json
@@ -23,6 +25,7 @@ st.set_page_config(
 
 @st.cache_data
 def load_csv(path: Path) -> pd.DataFrame:
+    # Кешування зменшує час перемикання між вкладками з великими CSV-звітами.
     return pd.read_csv(path)
 
 
@@ -32,6 +35,7 @@ def load_dataset(search_space: str) -> pd.DataFrame:
 
 
 def show_metrics() -> None:
+    # Метрики зберігаються окремо для кожного search space і цільової змінної.
     st.caption(
         "Таблиця порівнює регресійні моделі для прогнозування latency та energy. "
         "Найкраща модель обирається за мінімальним MAE."
@@ -82,6 +86,7 @@ def show_metrics() -> None:
 
 
 def show_error_analysis() -> None:
+    # Вкладка використовує агреговані звіти, які формує analyze_baseline_errors.py.
     device_path = REPORTS_DIR / "error_by_device.csv"
     dataset_path = REPORTS_DIR / "error_by_dataset.csv"
 
@@ -133,6 +138,7 @@ def show_error_analysis() -> None:
 
 
 def show_feature_importance() -> None:
+    # Permutation importance показує, наскільки зростає MAE після перемішування ознаки.
     path = REPORTS_DIR / "feature_importance.csv"
     if not path.exists():
         st.warning("Спочатку запустіть `python src/analyze_feature_importance.py`.")
@@ -185,6 +191,7 @@ def show_recommendations() -> None:
     left, right = st.columns([1, 2])
 
     with left:
+        # Значення за замовчуванням беруться з розподілу реальних benchmark-даних.
         search_space = st.selectbox("Простір пошуку", sorted(DATASET_PATHS))
         source_df = load_dataset(search_space)
         positive_latency = source_df.loc[
@@ -227,6 +234,7 @@ def show_recommendations() -> None:
         top_n = st.slider("Кількість рекомендацій", min_value=5, max_value=50, value=10, step=5)
 
     args = SimpleNamespace(
+        # recommend_config.recommend очікує argparse-подібний об'єкт.
         search_space=search_space,
         max_latency=max_latency,
         max_energy=max_energy,

@@ -1,3 +1,5 @@
+"""Підбір рекомендованих конфігурацій за прогнозованими latency та energy."""
+
 from __future__ import annotations
 
 import argparse
@@ -18,6 +20,7 @@ DATASET_PATHS = {
 }
 
 FEATURES = {
+    # Списки ознак мають збігатися з тими, що використовувалися під час навчання.
     "nasbench201": {
         "categorical": ["dataset", "device"],
         "numeric": [
@@ -81,6 +84,7 @@ FEATURES = {
 }
 
 SORT_COLUMNS = {
+    # Другий критерій використовується як tie-breaker між близькими конфігураціями.
     "latency": ["predicted_latency", "predicted_energy"],
     "energy": ["predicted_energy", "predicted_latency"],
 }
@@ -156,6 +160,7 @@ def load_model(search_space: str, target: str) -> object:
 def prepare_candidates(search_space: str) -> pd.DataFrame:
     df = pd.read_csv(DATASET_PATHS[search_space])
     feature_columns = FEATURES[search_space]["categorical"] + FEATURES[search_space]["numeric"]
+    # Конфігурації з неповними ознаками не можна подати у sklearn pipeline.
     return df.dropna(subset=feature_columns).copy()
 
 
@@ -166,6 +171,7 @@ def add_predictions(df: pd.DataFrame, search_space: str) -> pd.DataFrame:
     latency_model = load_model(search_space, "latency")
     candidates["predicted_latency"] = latency_model.predict(candidates[feature_columns])
 
+    # Energy прогнозується окремою моделлю, бо доступна не для всіх пристроїв у датасеті.
     energy_model = load_model(search_space, "energy")
     candidates["predicted_energy"] = energy_model.predict(candidates[feature_columns])
 
@@ -174,6 +180,7 @@ def add_predictions(df: pd.DataFrame, search_space: str) -> pd.DataFrame:
 
 def filter_candidates(df: pd.DataFrame, args: argparse.Namespace) -> pd.DataFrame:
     candidates = df.copy()
+    # Відсікаємо фізично некоректні прогнози, які можуть з'явитися у регресійних моделей.
     candidates = candidates[
         (candidates["predicted_latency"] > 0)
         & (candidates["predicted_energy"] > 0)
@@ -200,6 +207,7 @@ def recommend(args: argparse.Namespace) -> pd.DataFrame:
     candidates = prepare_candidates(args.search_space)
     candidates = add_predictions(candidates, args.search_space)
     candidates = filter_candidates(candidates, args)
+    # Стабільне сортування робить результат відтворюваним для однакових прогнозів.
     tie_breaker = "arch_id" if args.search_space == "nasbench201" else "block_id"
     candidates = candidates.sort_values(
         SORT_COLUMNS[args.sort_by] + [tie_breaker],

@@ -1,3 +1,5 @@
+"""Навчання моделей прогнозування latency та energy для HW-NAS-Bench."""
+
 from __future__ import annotations
 
 import argparse
@@ -30,6 +32,7 @@ TARGETS = ("latency", "energy")
 
 @dataclass(frozen=True)
 class DatasetConfig:
+    # Конфігурація задає, які колонки використовуються як ознаки для кожного search space.
     search_space: str
     dataset_path: Path
     categorical_features: list[str]
@@ -97,6 +100,7 @@ def build_pipeline(
     numeric_features: list[str],
     scale_numeric: bool = False,
 ) -> Pipeline:
+    # Категоріальні ознаки кодуються One-Hot, числові передаються напряму або масштабуються.
     numeric_transformer = StandardScaler() if scale_numeric else "passthrough"
     preprocessor = ColumnTransformer(
         transformers=[
@@ -113,6 +117,7 @@ def build_pipeline(
 
 
 def build_candidates() -> dict[str, object]:
+    # Порівнюються три рівні складності: baseline, boosting і невелика MLP-модель.
     return {
         "linear_regression": LinearRegression(),
         "gradient_boosting": HistGradientBoostingRegressor(
@@ -157,6 +162,7 @@ def load_training_data(
     df = pd.read_csv(config.dataset_path)
     rows_total = len(df)
 
+    # Для навчання залишаються тільки записи з повним набором ознак і додатним target.
     required_columns = config.categorical_features + config.numeric_features + [target]
     df = df[required_columns].dropna().copy()
     df = df[df[target] > 0].copy()
@@ -179,6 +185,7 @@ def train(config: DatasetConfig, target: str) -> dict[str, object]:
     results = []
     trained_pipelines: dict[str, Pipeline] = {}
 
+    # Кожна модель навчається на однаковому train/test split для коректного порівняння.
     for model_name, model in build_candidates().items():
         pipeline = build_pipeline(
             model=model,
@@ -194,6 +201,7 @@ def train(config: DatasetConfig, target: str) -> dict[str, object]:
     best_model_name = str(best_result["model"])
     best_pipeline = trained_pipelines[best_model_name]
 
+    # Найкраща модель визначається за мінімальним MAE і зберігається для рекомендацій.
     metrics = {
         "search_space": config.search_space,
         "dataset": str(config.dataset_path.relative_to(PROJECT_ROOT)),

@@ -1,3 +1,5 @@
+"""Швидкий перегляд вкладеної структури сирого HW-NAS-Bench pickle."""
+
 from __future__ import annotations
 
 import pickle
@@ -10,6 +12,7 @@ PICKLE_PATH = PROJECT_ROOT / "data" / "raw" / "HW-NAS-Bench-v1_0.pickle"
 
 
 def preview(value: Any, depth: int = 0, max_depth: int = 3) -> None:
+    # Рекурсивний перегляд показує типи, ключі та короткі приклади без повного друку датасету.
     indent = "  " * depth
     type_name = type(value).__name__
 

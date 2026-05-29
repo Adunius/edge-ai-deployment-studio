@@ -1,3 +1,5 @@
+"""Експорт сирого HW-NAS-Bench pickle у табличні CSV-файли."""
+
 from __future__ import annotations
 
 import pickle
@@ -14,6 +16,7 @@ PICKLE_PATH = PROJECT_ROOT / "data" / "raw" / "HW-NAS-Bench-v1_0.pickle"
 PROCESSED_DIR = PROJECT_ROOT / "data" / "processed"
 
 OP_NAMES = ("avg_pool_3x3", "nor_conv_1x1", "nor_conv_3x3", "skip_connect", "none")
+# Назва FBNet-блоку містить основні параметри операції, тому їх можна витягнути regex-ом.
 FBNET_PATTERN = re.compile(
     r"ConvBlock_H(?P<input_h>\d+)_W(?P<input_w>\d+)_Cin(?P<cin>\d+)"
     r"_Cout(?P<cout>\d+)_exp(?P<expansion>\d+)_kernel(?P<kernel>\d+)"
@@ -35,6 +38,7 @@ def get_device(metric_name: str, suffix: str) -> str:
 
 def extract_nasbench201_features(config: dict[str, Any]) -> dict[str, Any]:
     arch_str = config["arch_str"]
+    # NASBench201 описує архітектуру рядком; кількість операцій стає числовими ознаками.
     op_counts = Counter(re.findall(r"([a-z0-9_]+)~\d+", arch_str))
 
     features = {
@@ -53,6 +57,7 @@ def extract_nasbench201_features(config: dict[str, Any]) -> dict[str, Any]:
 def export_nasbench201(data: dict[str, Any]) -> pd.DataFrame:
     rows: list[dict[str, Any]] = []
 
+    # Один запис відповідає парі: архітектура NASBench201 + пристрій + dataset.
     for dataset_name, dataset_data in data["nasbench201"].items():
         configs = dataset_data["config"]
         latency_metrics = [name for name in dataset_data if name.endswith("_latency")]
@@ -103,6 +108,7 @@ def export_fbnet(data: dict[str, Any]) -> pd.DataFrame:
     fbnet_data = data["fbnet"]
     latency_metrics = [name for name in fbnet_data if name.endswith("_latency")]
 
+    # Для FBNet одиницею аналізу є окремий convolution block на конкретному пристрої.
     for latency_metric in latency_metrics:
         device = get_device(latency_metric, "_latency")
         energy_metric = f"{device}_energy"
