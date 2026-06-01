@@ -80,6 +80,127 @@ requirements.txt
 - `src/evaluate_split_strategies.py` порівнює якість моделі при random split, architecture split і device split.
 - `EXPERIMENTS.md` містить журнал проведених експериментів, таблиці результатів і короткі висновки.
 
+## Скрипти, результати та взаємодія компонентів
+
+Проєкт побудований як послідовний pipeline: сирий benchmark-файл перетворюється на CSV-таблиці, на їх основі навчаються моделі, після цього окремі скрипти аналізують якість прогнозування, а Streamlit-інтерфейс читає готові звіти та моделі.
+
+```text
+data/raw/HW-NAS-Bench-v1_0.pickle
+        |
+        v
+src/export_hwnasbench_csv.py
+        |
+        v
+data/processed/*.csv
+        |
+        v
+src/train_performance.py
+        |
+        +--> models/*_predictor.pkl
+        +--> reports/*_metrics.json
+        |
+        +--> src/analyze_baseline_errors.py      -> reports/error_*.csv
+        +--> src/analyze_feature_importance.py   -> reports/feature_importance.csv
+        +--> src/evaluate_split_strategies.py    -> reports/split_strategy_results.csv
+        +--> src/recommend_config.py             -> reports/recommendations_*.csv
+        |
+        v
+app.py
+```
+
+### Підготовка даних
+
+`src/inspect_hwnasbench.py` використовується для первинного огляду сирого файлу `data/raw/HW-NAS-Bench-v1_0.pickle`. Він потрібен не для навчання, а для перевірки структури benchmark-даних: які search space-и доступні, які пристрої присутні, як названі latency та energy метрики.
+
+`src/export_hwnasbench_csv.py` перетворює сирий `.pickle` у дві таблиці:
+
+- `data/processed/hwnasbench_nasbench201.csv`;
+- `data/processed/hwnasbench_fbnet.csv`.
+
+Для `NASBench201` скрипт формує рядки на рівні комбінації `архітектура + dataset + device`. Окрім `latency` та `energy`, він витягує архітектурні ознаки: `base_channels`, `num_cells`, `num_classes`, `arch_str` і кількість операцій `avg_pool_3x3`, `nor_conv_1x1`, `nor_conv_3x3`, `skip_connect`, `none`.
+
+Для `FBNet` скрипт формує рядки на рівні `convolution block + device`. З назви блоку витягуються параметри `input_h`, `input_w`, `cin`, `cout`, `expansion`, `kernel`, `stride` і `group`. Ці CSV є основним входом для всіх наступних ML-скриптів.
+
+### Навчання моделей
+
+`src/train_performance.py` є головним скриптом навчання. Він запускається окремо для кожної пари `search_space` і `target`:
+
+- `nasbench201 + latency`;
+- `nasbench201 + energy`;
+- `fbnet + latency`;
+- `fbnet + energy`.
+
+Скрипт читає відповідний CSV з `data/processed/`, залишає рядки з повним набором ознак і додатним target-значенням, після чого порівнює три регресійні підходи:
+
+- `Linear Regression` як проста baseline-модель;
+- `HistGradientBoostingRegressor` як сильна модель для табличних даних;
+- `MLPRegressor` як нейромережева модель для нелінійної апроксимації.
+
+Для кожної моделі рахуються `MAE`, `RMSE` і `MAPE`. Найкраща модель вибирається за мінімальним `MAE`, зберігається у `models/`, а повний звіт з метриками записується у `reports/*_metrics.json`.
+
+Результати цих JSON-файлів показують, яка модель краще працює для кожної цільової змінної. У поточних експериментах для latency найкращою є `MLPRegressor`, а для energy стабільніше працює `Gradient Boosting`.
+
+### Аналіз помилок
+
+`src/analyze_baseline_errors.py` аналізує помилки збереженої NASBench201 latency-моделі. Він повторює той самий train/test split, завантажує `models/nasbench201_latency_predictor.pkl`, прогнозує latency для test-вибірки та формує:
+
+- `reports/error_analysis.csv` - построкові прогнози, фактичні значення й помилки;
+- `reports/error_by_device.csv` - агреговані помилки за пристроями;
+- `reports/error_by_dataset.csv` - агреговані помилки за датасетами.
+
+Цей аналіз показує, на яких hardware-платформах модель працює краще або гірше. Якщо для певного пристрою `MAE` суттєво вищий, це означає, що модель гірше переносить закономірності latency на цей тип hardware.
+
+### Важливість ознак
+
+`src/analyze_feature_importance.py` оцінює внесок ознак методом permutation importance. Скрипт бере навчену NASBench201 latency-модель, по черзі випадково перемішує значення кожної ознаки у test-вибірці та вимірює, наскільки після цього зростає `MAE`.
+
+Результат зберігається у `reports/feature_importance.csv`. Якщо після перемішування ознаки помилка сильно зростає, ця ознака є важливою для прогнозу. У поточному аналізі найбільший вплив має `device`, що логічно для задачі latency prediction: одна й та сама архітектура може мати різний час inference на різних edge-пристроях.
+
+### Перевірка split-стратегій
+
+`src/evaluate_split_strategies.py` перевіряє, наскільки модель узагальнюється за різних способів формування train/test-вибірки. Він порівнює:
+
+- `random split` - звичайне випадкове розбиття рядків;
+- `architecture split` - test містить архітектури, яких не було у train;
+- `device split` - test містить пристрій, якого не було у train.
+
+Результати записуються у `reports/split_strategy_results.csv`. `Random split` показує базову якість, `architecture split` перевіряє перенесення на нові архітектури, а `device split` є найскладнішим сценарієм, бо перевіряє перенесення на нову hardware-платформу. Поточні результати показують, що перенесення на нові архітектури майже не погіршує якість, але перенесення на новий пристрій є складнішим, особливо для `raspi4`.
+
+### Рекомендації конфігурацій
+
+`src/recommend_config.py` використовує вже навчені моделі з `models/`. Для вибраного search space він завантажує дві моделі:
+
+- модель прогнозування `latency`;
+- модель прогнозування `energy`.
+
+Після цього скрипт прогнозує `predicted_latency` і `predicted_energy` для доступних конфігурацій, відкидає фізично некоректні прогнози `<= 0`, застосовує обмеження користувача `--max-latency`, `--max-energy`, `--device`, `--dataset` і сортує результат за `latency` або `energy`.
+
+Вихідні файли `reports/recommendations_*.csv` містять top-N конфігурацій, які відповідають заданим обмеженням. Саме цю логіку також використовує вкладка "Рекомендації" у `app.py`.
+
+### Роль папок `models/` і `reports/`
+
+`models/` містить серіалізовані sklearn pipeline-и у форматі `.pkl`. У кожному такому файлі збережено не лише регресійну модель, а й preprocessing: one-hot encoding категоріальних ознак та обробку числових ознак. Завдяки цьому модель можна завантажити й одразу викликати `.predict(...)` для таблиці з потрібними колонками.
+
+`reports/` містить результати експериментів у форматах JSON і CSV. Ці файли виконують дві ролі:
+
+- фіксують результати експериментів для документації та аналізу;
+- слугують джерелом даних для Streamlit-інтерфейсу.
+
+JSON-файли `*_metrics.json` описують якість моделей, CSV-файли `error_*.csv` пояснюють помилки, `feature_importance.csv` показує важливість ознак, `split_strategy_results.csv` описує узагальнення моделі, а `recommendations_*.csv` містять готові рекомендовані конфігурації.
+
+### Взаємодія зі Streamlit-інтерфейсом
+
+`app.py` не навчає моделі з нуля. Він читає вже підготовлені артефакти:
+
+- метрики з `reports/*_metrics.json`;
+- аналіз помилок з `reports/error_*.csv`;
+- важливість ознак з `reports/feature_importance.csv`;
+- split-результати з `reports/split_strategy_results.csv`;
+- CSV-датасети з `data/processed/`;
+- моделі з `models/` для інтерактивного підбору рекомендацій.
+
+Завдяки такому поділу скрипти у `src/` відповідають за відтворювані експерименти та генерацію артефактів, а `app.py` відповідає за зручне представлення цих результатів користувачу.
+
 ## Налаштування середовища
 
 Створіть і активуйте Python virtual environment, після чого встановіть залежності:
