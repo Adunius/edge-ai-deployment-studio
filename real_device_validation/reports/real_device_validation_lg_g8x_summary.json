@@ -1,0 +1,35 @@
+{
+  "rows": 24,
+  "benchmark_device": "pixel3",
+  "real_device": "lg_g8x_thinq",
+  "mae_ms": 3.6647059583333337,
+  "rmse_ms": 4.485310006412855,
+  "median_absolute_error_ms": 3.1775010000000004,
+  "median_relative_error_percent": 84.09742447274749,
+  "pearson_correlation": 0.9105659732285466,
+  "spearman_rank_correlation": 0.9182608695652172,
+  "latency_group_summary": [
+    {
+      "latency_group": "fast",
+      "rows": 8,
+      "predicted_median_ms": 0.077708,
+      "measured_median_ms": 1.347331,
+      "absolute_error_median_ms": 1.213035
+    },
+    {
+      "latency_group": "medium",
+      "rows": 8,
+      "predicted_median_ms": 0.9278485000000001,
+      "measured_median_ms": 5.9447525,
+      "absolute_error_median_ms": 5.0970775
+    },
+    {
+      "latency_group": "slow",
+      "rows": 8,
+      "predicted_median_ms": 14.105679,
+      "measured_median_ms": 16.849636,
+      "absolute_error_median_ms": 3.4402240000000006
+    }
+  ],
+  "note": "LG G8X ThinQ is not the original HW-NAS-Bench pixel3 device. This validation checks practical ranking consistency on a real Android device."
+}

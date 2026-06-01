@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 .venv/
+.venv-tflite/
 venv/
 env/
 
@@ -32,3 +33,9 @@ models/*.joblib
 tmp/
 temp/
 reports/error_analysis.csv
+
+# Real-device validation local build/generated artifacts
+real_device_validation/android_benchmark/.gradle/
+real_device_validation/android_benchmark/**/build/
+real_device_validation/android_benchmark/.idea/
+real_device_validation/android_benchmark/local.properties
