@@ -233,6 +233,95 @@ reports/real_device_validation_lg_g8x_summary.json
 | medium | 16 | 0.9278 | 6.2520 | 5.3741 |
 | slow | 16 | 14.1057 | 15.3582 | 2.4676 |
 
+## Профайлінгові ознаки
+
+Після зауваження щодо профайлінгу нейромереж датасет було розширено не новими фізичними замірами, а розрахунковими ознаками обчислювальної складності. За основу взято підхід з документації PyTorch Profiler і TensorFlow Profiler: аналізувати не лише загальний час виконання моделі, а й оператори, форми тензорів, кількість викликів та використання пам'яті.
+
+Джерела, на які спирається термінологія профайлінгу:
+
+- PyTorch Profiler: <https://docs.pytorch.org/tutorials/recipes/recipes/profiler_recipe.html>
+- TensorFlow Profiler: <https://www.tensorflow.org/guide/profiler>
+
+У нашому Android/TFLite benchmark ці ідеї адаптовано до FBNet-блоків. Оскільки кожен блок описаний параметрами `input_h`, `input_w`, `cin`, `cout`, `expansion`, `kernel`, `stride` і `group`, для нього можна приблизно оцінити обчислювальну складність.
+
+Додані ознаки:
+
+- `output_h`, `output_w` - розмір вихідної карти ознак після згортки;
+- `expanded_channels` - кількість каналів після expansion-шару;
+- `effective_groups` - фактична кількість груп у grouped convolution;
+- `expand_macs` - MACs для 1x1 expansion convolution;
+- `spatial_macs` - MACs для основної grouped convolution;
+- `estimated_macs` - сумарна кількість multiply-accumulate operations;
+- `estimated_flops` - приблизна кількість floating-point operations, прийнято `FLOPs = 2 * MACs`;
+- `estimated_params` - приблизна кількість параметрів згорток;
+- `macs_per_input_pixel` - щільність обчислень на один вхідний піксель;
+- `measured_tops` і `cpu_tops` - приблизна пропускна здатність у trillion operations per second.
+
+Формула для основної grouped convolution:
+
+```text
+MACs = output_h * output_w * kernel * kernel * (input_channels / groups) * output_channels
+```
+
+Для блоку з `expansion > 1` додатково враховується 1x1 expansion convolution:
+
+```text
+MACs_expand = input_h * input_w * cin * expanded_channels
+```
+
+`TOPS` у цьому звіті не є паспортною характеристикою телефону. Це приблизна оцінка фактичної пропускної здатності для конкретного benchmark-запуску:
+
+```text
+TOPS = estimated_flops / execution_time_seconds / 1e12
+```
+
+Підсумок за profiling-ознаками:
+
+| Feature | Median | Min | Max |
+| --- | ---: | ---: | ---: |
+| estimated_macs | 29,638,656 | 589,824 | 500,957,184 |
+| estimated_flops | 59,277,312 | 1,179,648 | 1,001,914,368 |
+| estimated_params | 33,408 | 3,200 | 846,400 |
+| measured_tops | 0.0098 | 0.0015 | 0.0386 |
+| cpu_tops | 0.0100 | 0.0008 | 0.0384 |
+
+## Прогнозування цільових метрик
+
+Кореляція Spearman залишена як допоміжна перевірка ranking, але для оцінки практичного прогнозування додано окрему модель. Для цього використано `RandomForestRegressor`, а перевірку виконано через `GroupKFold by block_id`, щоб один і той самий FBNet-блок не потрапляв одночасно в навчальну і тестову частини.
+
+Ознаки моделі:
+
+```text
+predicted_latency,
+input_h, input_w, cin, cout, expansion, kernel, stride, group,
+output_h, output_w, expanded_channels, effective_groups,
+estimated_macs, estimated_flops, estimated_params, macs_per_input_pixel
+```
+
+Цільові метрики:
+
+- `measured_median_ms`;
+- `cpu_per_run_ms`;
+- `pss_after_kb`;
+- `native_heap_after_kb`.
+
+Результати прогнозування:
+
+| Target | MAE | RMSE | MAPE, % | R2 |
+| --- | ---: | ---: | ---: | ---: |
+| latency_median_ms | 1.4145 ms | 2.7977 ms | 30.63 | 0.8389 |
+| cpu_per_run_ms | 1.5683 ms | 3.1623 ms | 26.15 | 0.8303 |
+| pss_after_kb | 14470.33 KB | 14829.32 KB | 22.52 | 0.0296 |
+| native_heap_after_kb | 2497.16 KB | 2680.37 KB | 16.21 | 0.5301 |
+
+Отже, profiling-ознаки добре пояснюють latency і CPU time, бо вони напряму залежать від кількості обчислень у блоці. Пам'ять прогнозується гірше, особливо total PSS, тому що вона залежить не лише від архітектури блоку, а й від Android runtime, TFLite interpreter, алокацій процесу та конкретного пристрою.
+
+Окремий файл з метриками:
+
+```text
+reports/real_android_fbnet_prediction_metrics.csv
+```
+
 ## Інтерпретація Spearman correlation
 
 `Spearman rank correlation` показує, наскільки добре збігається порядок об'єктів. У цьому експерименті вона відповідає на питання:

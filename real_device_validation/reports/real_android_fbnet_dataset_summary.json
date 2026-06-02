@@ -112,6 +112,99 @@
       "max": 356.0
     }
   },
+  "profile_feature_columns": [
+    "estimated_macs",
+    "estimated_flops",
+    "estimated_params",
+    "measured_tops",
+    "cpu_tops"
+  ],
+  "profile_feature_summary": {
+    "estimated_macs": {
+      "mean": 81062784.0,
+      "median": 29638656.0,
+      "min": 589824.0,
+      "max": 500957184.0
+    },
+    "estimated_flops": {
+      "mean": 162125568.0,
+      "median": 59277312.0,
+      "min": 1179648.0,
+      "max": 1001914368.0
+    },
+    "estimated_params": {
+      "mean": 131908.0,
+      "median": 33408.0,
+      "min": 3200.0,
+      "max": 846400.0
+    },
+    "measured_tops": {
+      "mean": 0.013403834696743272,
+      "median": 0.009754470016174837,
+      "min": 0.0014564490559887797,
+      "max": 0.03860375945675475
+    },
+    "cpu_tops": {
+      "mean": 0.01216861936368637,
+      "median": 0.010000353687721494,
+      "min": 0.0008079780821917808,
+      "max": 0.03841696196319019
+    }
+  },
+  "prediction_model_metrics": [
+    {
+      "target": "latency_median_ms",
+      "rows": 48,
+      "model": "RandomForestRegressor",
+      "validation": "GroupKFold by block_id, n_splits=6",
+      "mae": 1.4145042625687836,
+      "rmse": 2.7976817163358967,
+      "mape_percent": 30.625050295956438,
+      "r2": 0.8389002893583146
+    },
+    {
+      "target": "cpu_per_run_ms",
+      "rows": 48,
+      "model": "RandomForestRegressor",
+      "validation": "GroupKFold by block_id, n_splits=6",
+      "mae": 1.5682931167328051,
+      "rmse": 3.162333830257765,
+      "mape_percent": 26.154099089892018,
+      "r2": 0.8302758648095159
+    },
+    {
+      "target": "pss_after_kb",
+      "rows": 48,
+      "model": "RandomForestRegressor",
+      "validation": "GroupKFold by block_id, n_splits=6",
+      "mae": 14470.333333333334,
+      "rmse": 14829.323499732369,
+      "mape_percent": 22.516232646236475,
+      "r2": 0.029574288882608712
+    },
+    {
+      "target": "native_heap_after_kb",
+      "rows": 48,
+      "model": "RandomForestRegressor",
+      "validation": "GroupKFold by block_id, n_splits=6",
+      "mae": 2497.164477678571,
+      "rmse": 2680.3729126882777,
+      "mape_percent": 16.208552082727685,
+      "r2": 0.5301020705868009
+    }
+  ],
+  "profiling_references": [
+    {
+      "title": "PyTorch Profiler recipe",
+      "url": "https://docs.pytorch.org/tutorials/recipes/recipes/profiler_recipe.html",
+      "used_for": "Terminology for operator execution time, call counts, input shapes, and memory consumption in neural-network profiling."
+    },
+    {
+      "title": "TensorFlow Profiler guide",
+      "url": "https://www.tensorflow.org/guide/profiler",
+      "used_for": "General profiling workflow for TensorFlow models and hardware performance analysis."
+    }
+  ],
   "latency_group_summary": [
     {
       "latency_group": "fast",

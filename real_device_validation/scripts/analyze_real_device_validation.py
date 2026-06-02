@@ -1,4 +1,4 @@
-"""Analyze LG G8X real-device validation results."""
+"""Analyze real-device validation results and derived profiling features."""
 
 from __future__ import annotations
 
@@ -7,7 +7,9 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.model_selection import GroupKFold
 
 
 EXPERIMENT_DIR = Path(__file__).resolve().parents[1]
@@ -20,6 +22,151 @@ DEVICE_INFO_PATH = REPORTS_DIR / "device_info.csv"
 DATASET_PATH = REPORTS_DIR / "real_android_fbnet_dataset.csv"
 ANALYZED_PATH = REPORTS_DIR / "real_android_fbnet_dataset_analyzed.csv"
 SUMMARY_PATH = REPORTS_DIR / "real_android_fbnet_dataset_summary.json"
+PREDICTION_METRICS_PATH = REPORTS_DIR / "real_android_fbnet_prediction_metrics.csv"
+
+
+def add_profile_features(df: pd.DataFrame) -> pd.DataFrame:
+    """Add approximate convolution profiling features for the generated proxy blocks."""
+    df = df.copy()
+
+    input_h = df["input_h"].astype(int)
+    input_w = df["input_w"].astype(int)
+    cin = df["cin"].astype(int)
+    cout = df["cout"].astype(int)
+    expansion = df["expansion"].astype(int)
+    kernel = df["kernel"].astype(int)
+    stride = df["stride"].astype(int)
+    group = df["group"].astype(int)
+
+    expanded_channels = cin * expansion
+    output_h = np.ceil(input_h / stride).astype(int)
+    output_w = np.ceil(input_w / stride).astype(int)
+    spatial_positions = output_h * output_w
+
+    expand_macs = np.where(
+        expansion > 1,
+        input_h * input_w * cin * expanded_channels,
+        0,
+    )
+    expand_params = np.where(
+        expansion > 1,
+        cin * expanded_channels,
+        0,
+    )
+
+    effective_groups = np.where(
+        (expanded_channels % group == 0) & (cout % group == 0),
+        group,
+        1,
+    )
+    spatial_macs = (
+        spatial_positions
+        * kernel
+        * kernel
+        * (expanded_channels / effective_groups)
+        * cout
+    )
+    spatial_params = kernel * kernel * (expanded_channels / effective_groups) * cout
+
+    estimated_macs = expand_macs + spatial_macs
+    estimated_params = expand_params + spatial_params
+
+    df["output_h"] = output_h
+    df["output_w"] = output_w
+    df["expanded_channels"] = expanded_channels
+    df["effective_groups"] = effective_groups.astype(int)
+    df["expand_macs"] = expand_macs.astype(np.int64)
+    df["spatial_macs"] = spatial_macs.astype(np.int64)
+    df["estimated_macs"] = estimated_macs.astype(np.int64)
+    df["estimated_flops"] = (2 * estimated_macs).astype(np.int64)
+    df["estimated_params"] = estimated_params.astype(np.int64)
+    df["macs_per_input_pixel"] = estimated_macs / (input_h * input_w)
+    df["measured_tops"] = df["estimated_flops"] / (
+        df["measured_median_ms"].replace(0, np.nan) / 1000
+    ) / 1e12
+    df["cpu_tops"] = df["estimated_flops"] / (
+        df["cpu_per_run_ms"].replace(0, np.nan) / 1000
+    ) / 1e12
+    return df
+
+
+def evaluate_prediction_models(df: pd.DataFrame) -> list[dict[str, float | str | int]]:
+    feature_columns = [
+        "predicted_latency",
+        "input_h",
+        "input_w",
+        "cin",
+        "cout",
+        "expansion",
+        "kernel",
+        "stride",
+        "group",
+        "output_h",
+        "output_w",
+        "expanded_channels",
+        "effective_groups",
+        "estimated_macs",
+        "estimated_flops",
+        "estimated_params",
+        "macs_per_input_pixel",
+    ]
+    target_columns = {
+        "latency_median_ms": "measured_median_ms",
+        "cpu_per_run_ms": "cpu_per_run_ms",
+        "pss_after_kb": "pss_after_kb",
+        "native_heap_after_kb": "native_heap_after_kb",
+    }
+
+    available_features = [column for column in feature_columns if column in df.columns]
+    x = df[available_features].replace([np.inf, -np.inf], np.nan).fillna(0)
+    groups = df["block_id"]
+    n_splits = min(6, int(groups.nunique()))
+    splitter = GroupKFold(n_splits=n_splits)
+
+    metrics = []
+    for metric_name, target_column in target_columns.items():
+        if target_column not in df.columns:
+            continue
+
+        y = df[target_column].replace([np.inf, -np.inf], np.nan)
+        valid = y.notna()
+        x_valid = x.loc[valid]
+        y_valid = y.loc[valid]
+        groups_valid = groups.loc[valid]
+        predictions = pd.Series(index=y_valid.index, dtype=float)
+
+        for train_idx, test_idx in splitter.split(x_valid, y_valid, groups_valid):
+            model = RandomForestRegressor(
+                n_estimators=200,
+                max_depth=6,
+                random_state=42,
+            )
+            model.fit(x_valid.iloc[train_idx], y_valid.iloc[train_idx])
+            predictions.iloc[test_idx] = model.predict(x_valid.iloc[test_idx])
+
+        mae = mean_absolute_error(y_valid, predictions)
+        rmse = np.sqrt(mean_squared_error(y_valid, predictions))
+        mape = (
+            (np.abs(y_valid - predictions) / y_valid.replace(0, np.nan)).replace(
+                [np.inf, -np.inf],
+                np.nan,
+            )
+            * 100
+        ).mean()
+        metrics.append(
+            {
+                "target": metric_name,
+                "rows": int(len(y_valid)),
+                "model": "RandomForestRegressor",
+                "validation": f"GroupKFold by block_id, n_splits={n_splits}",
+                "mae": float(mae),
+                "rmse": float(rmse),
+                "mape_percent": float(mape),
+                "r2": float(r2_score(y_valid, predictions)),
+            }
+        )
+
+    return metrics
 
 
 def main() -> None:
@@ -44,6 +191,7 @@ def main() -> None:
         df = df.merge(device_info, on="device_id", how="left")
 
     df = df.copy()
+    df = add_profile_features(df)
     df["absolute_error_ms"] = (
         df["measured_median_ms"] - df["predicted_latency"]
     ).abs()
@@ -143,6 +291,19 @@ def main() -> None:
             .to_dict()
         )
 
+    profile_columns = [
+        "estimated_macs",
+        "estimated_flops",
+        "estimated_params",
+        "measured_tops",
+        "cpu_tops",
+    ]
+    profile_summary = (
+        df[profile_columns].agg(["mean", "median", "min", "max"]).to_dict()
+    )
+    prediction_metrics = evaluate_prediction_models(df)
+    pd.DataFrame(prediction_metrics).to_csv(PREDICTION_METRICS_PATH, index=False)
+
     summary = {
         "rows": int(len(df)),
         "devices": sorted(df["device_id"].dropna().unique().tolist()),
@@ -164,6 +325,27 @@ def main() -> None:
         "device_summary": device_grouped.to_dict(orient="records"),
         "resource_columns_available": available_resource_columns,
         "resource_summary": resource_summary,
+        "profile_feature_columns": profile_columns,
+        "profile_feature_summary": profile_summary,
+        "prediction_model_metrics": prediction_metrics,
+        "profiling_references": [
+            {
+                "title": "PyTorch Profiler recipe",
+                "url": "https://docs.pytorch.org/tutorials/recipes/recipes/profiler_recipe.html",
+                "used_for": (
+                    "Terminology for operator execution time, call counts, input shapes, "
+                    "and memory consumption in neural-network profiling."
+                ),
+            },
+            {
+                "title": "TensorFlow Profiler guide",
+                "url": "https://www.tensorflow.org/guide/profiler",
+                "used_for": (
+                    "General profiling workflow for TensorFlow models and hardware "
+                    "performance analysis."
+                ),
+            },
+        ],
         "latency_group_summary": grouped.to_dict(orient="records"),
         "note": (
             "The physical Android devices are not the original HW-NAS-Bench pixel3 device. "
@@ -179,6 +361,7 @@ def main() -> None:
     print(f"Saved combined real-device dataset to: {DATASET_PATH}")
     print(f"Saved analyzed validation rows to: {ANALYZED_PATH}")
     print(f"Saved validation summary to: {SUMMARY_PATH}")
+    print(f"Saved prediction model metrics to: {PREDICTION_METRICS_PATH}")
     print(json.dumps(summary, indent=2))
 
 
