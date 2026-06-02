@@ -1,0 +1,3 @@
+device_id,device_name,android_model,android_version,hardware,board_platform
+lg_g8x_thinq,LG G8X ThinQ,LM-G850,10,mh2lm,msmnile
+redmi_note_9_pro,Redmi Note 9 Pro,Redmi Note 9 Pro,12,qcom,atoll

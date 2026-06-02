@@ -1,7 +1,9 @@
 package com.example.realdevicebenchmark;
 
 import android.app.Activity;
+import android.os.Debug;
 import android.os.Bundle;
+import android.os.Process;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.ViewGroup;
@@ -119,6 +121,11 @@ public class MainActivity extends Activity {
                 interpreter.run(input, outputBuffer);
             }
 
+            Runtime runtime = Runtime.getRuntime();
+            Debug.MemoryInfo memoryBefore = readMemoryInfo();
+            long javaHeapBeforeKb = usedJavaHeapKb(runtime);
+            long nativeHeapBeforeKb = Debug.getNativeHeapAllocatedSize() / 1024;
+            long cpuStartMs = Process.getElapsedCpuTime();
             List<Double> timingsMs = new ArrayList<>();
             for (int i = 0; i < MEASURED_RUNS; i++) {
                 input.rewind();
@@ -129,13 +136,32 @@ public class MainActivity extends Activity {
                 timingsMs.add(elapsedNs / 1_000_000.0);
                 SystemClock.sleep(5);
             }
+            long cpuElapsedMs = Process.getElapsedCpuTime() - cpuStartMs;
+            long nativeHeapAfterKb = Debug.getNativeHeapAllocatedSize() / 1024;
+            long javaHeapAfterKb = usedJavaHeapKb(runtime);
+            Debug.MemoryInfo memoryAfter = readMemoryInfo();
+            double measuredWallTotalMs = sum(timingsMs);
+            double cpuTimePerRunMs = cpuElapsedMs / (double) MEASURED_RUNS;
+            double cpuWallRatio = measuredWallTotalMs > 0.0 ? cpuElapsedMs / measuredWallTotalMs : 0.0;
 
             return new ResultRow(
                     spec,
                     mean(timingsMs),
                     median(timingsMs),
                     Collections.min(timingsMs),
-                    Collections.max(timingsMs)
+                    Collections.max(timingsMs),
+                    cpuElapsedMs,
+                    cpuTimePerRunMs,
+                    cpuWallRatio,
+                    memoryBefore.getTotalPss(),
+                    memoryAfter.getTotalPss(),
+                    memoryAfter.getTotalPss() - memoryBefore.getTotalPss(),
+                    javaHeapBeforeKb,
+                    javaHeapAfterKb,
+                    javaHeapAfterKb - javaHeapBeforeKb,
+                    nativeHeapBeforeKb,
+                    nativeHeapAfterKb,
+                    nativeHeapAfterKb - nativeHeapBeforeKb
             );
         }
     }
@@ -171,11 +197,25 @@ public class MainActivity extends Activity {
         return buffer;
     }
 
+    private Debug.MemoryInfo readMemoryInfo() {
+        Debug.MemoryInfo memoryInfo = new Debug.MemoryInfo();
+        Debug.getMemoryInfo(memoryInfo);
+        return memoryInfo;
+    }
+
+    private long usedJavaHeapKb(Runtime runtime) {
+        return (runtime.totalMemory() - runtime.freeMemory()) / 1024;
+    }
+
     private File writeResults(List<ResultRow> results) throws Exception {
         File outputFile = new File(getExternalFilesDir(null), "real_device_validation_lg_g8x.csv");
         StringBuilder csv = new StringBuilder();
         csv.append("block_id,benchmark_device,real_device,latency_group,predicted_latency,")
                 .append("measured_mean_ms,measured_median_ms,measured_min_ms,measured_max_ms,")
+                .append("cpu_total_ms,cpu_per_run_ms,cpu_wall_ratio,")
+                .append("pss_before_kb,pss_after_kb,pss_delta_kb,")
+                .append("java_heap_before_kb,java_heap_after_kb,java_heap_delta_kb,")
+                .append("native_heap_before_kb,native_heap_after_kb,native_heap_delta_kb,")
                 .append("input_h,input_w,cin,cout,expansion,kernel,stride,group,block_name\n");
         for (ResultRow result : results) {
             csv.append(result.toCsv()).append("\n");
@@ -200,11 +240,15 @@ public class MainActivity extends Activity {
     }
 
     private static double mean(List<Double> values) {
+        return sum(values) / values.size();
+    }
+
+    private static double sum(List<Double> values) {
         double sum = 0.0;
         for (double value : values) {
             sum += value;
         }
-        return sum / values.size();
+        return sum;
     }
 
     private static double median(List<Double> values) {
@@ -267,20 +311,64 @@ public class MainActivity extends Activity {
         final double medianMs;
         final double minMs;
         final double maxMs;
+        final long cpuTotalMs;
+        final double cpuPerRunMs;
+        final double cpuWallRatio;
+        final int pssBeforeKb;
+        final int pssAfterKb;
+        final int pssDeltaKb;
+        final long javaHeapBeforeKb;
+        final long javaHeapAfterKb;
+        final long javaHeapDeltaKb;
+        final long nativeHeapBeforeKb;
+        final long nativeHeapAfterKb;
+        final long nativeHeapDeltaKb;
 
-        ResultRow(ModelSpec spec, double meanMs, double medianMs, double minMs, double maxMs) {
+        ResultRow(
+                ModelSpec spec,
+                double meanMs,
+                double medianMs,
+                double minMs,
+                double maxMs,
+                long cpuTotalMs,
+                double cpuPerRunMs,
+                double cpuWallRatio,
+                int pssBeforeKb,
+                int pssAfterKb,
+                int pssDeltaKb,
+                long javaHeapBeforeKb,
+                long javaHeapAfterKb,
+                long javaHeapDeltaKb,
+                long nativeHeapBeforeKb,
+                long nativeHeapAfterKb,
+                long nativeHeapDeltaKb
+        ) {
             this.spec = spec;
             this.meanMs = meanMs;
             this.medianMs = medianMs;
             this.minMs = minMs;
             this.maxMs = maxMs;
+            this.cpuTotalMs = cpuTotalMs;
+            this.cpuPerRunMs = cpuPerRunMs;
+            this.cpuWallRatio = cpuWallRatio;
+            this.pssBeforeKb = pssBeforeKb;
+            this.pssAfterKb = pssAfterKb;
+            this.pssDeltaKb = pssDeltaKb;
+            this.javaHeapBeforeKb = javaHeapBeforeKb;
+            this.javaHeapAfterKb = javaHeapAfterKb;
+            this.javaHeapDeltaKb = javaHeapDeltaKb;
+            this.nativeHeapBeforeKb = nativeHeapBeforeKb;
+            this.nativeHeapAfterKb = nativeHeapAfterKb;
+            this.nativeHeapDeltaKb = nativeHeapDeltaKb;
         }
 
         String toHumanString() {
             return "block " + spec.blockId
                     + " [" + spec.latencyGroup + "]"
                     + " predicted=" + format(spec.predictedLatency)
-                    + " measured median=" + format(medianMs) + " ms";
+                    + " measured median=" + format(medianMs) + " ms"
+                    + " cpu/run=" + format(cpuPerRunMs) + " ms"
+                    + " pss=" + pssAfterKb + " KB";
         }
 
         String toCsv() {
@@ -296,6 +384,18 @@ public class MainActivity extends Activity {
                             format(medianMs),
                             format(minMs),
                             format(maxMs),
+                            String.valueOf(cpuTotalMs),
+                            format(cpuPerRunMs),
+                            format(cpuWallRatio),
+                            String.valueOf(pssBeforeKb),
+                            String.valueOf(pssAfterKb),
+                            String.valueOf(pssDeltaKb),
+                            String.valueOf(javaHeapBeforeKb),
+                            String.valueOf(javaHeapAfterKb),
+                            String.valueOf(javaHeapDeltaKb),
+                            String.valueOf(nativeHeapBeforeKb),
+                            String.valueOf(nativeHeapAfterKb),
+                            String.valueOf(nativeHeapDeltaKb),
                             String.valueOf(spec.inputH),
                             String.valueOf(spec.inputW),
                             String.valueOf(spec.cin),

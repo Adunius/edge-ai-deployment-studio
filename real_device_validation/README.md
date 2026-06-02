@@ -8,6 +8,7 @@
 
 - запустити вибрані FBNet-блоки на реальному Android-смартфоні;
 - виміряти фактичну latency;
+- зібрати додаткові resource metrics: CPU time, PSS memory, Java heap і native heap;
 - порівняти її з прогнозами моделі;
 - оцінити не лише абсолютну похибку, а й те, чи зберігається правильний порядок швидших і повільніших блоків.
 
@@ -23,7 +24,17 @@
 | Hardware | `mh2lm` |
 | Board platform | `msmnile` |
 
-Підключення виконувалося через Android Debug Bridge. Телефон успішно визначався командою `adb devices` як авторизований пристрій.
+Після розширення експерименту додано другий Android-пристрій:
+
+| Параметр | Значення |
+| --- | --- |
+| Device | Redmi Note 9 Pro |
+| Model | `Redmi Note 9 Pro` |
+| Android version | 12 |
+| Hardware | `qcom` |
+| Board platform | `atoll` |
+
+Підключення виконувалося через Android Debug Bridge. Обидва телефони успішно визначалися командою `adb devices` як авторизовані пристрої.
 
 Важливе обмеження: у HW-NAS-Bench є Android-подібний benchmark-пристрій `pixel3`, але фізично доступним був LG G8X ThinQ. Тому експеримент не трактується як точне відтворення `pixel3` latency. Він використовується як real-device sanity check на реальному Android edge-device.
 
@@ -141,6 +152,11 @@ android_benchmark/
 - виконує 10 warmup-запусків;
 - виконує 50 вимірюваних запусків;
 - рахує mean, median, min та max latency;
+- вимірює process CPU time під час inference;
+- зберігає memory metrics до та після запуску блоку:
+  - total PSS;
+  - Java heap;
+  - native heap;
 - зберігає CSV з результатами.
 
 Після запуску на LG G8X ThinQ результат було скопійовано з телефону через `adb pull` у файл:
@@ -172,25 +188,50 @@ reports/real_device_validation_lg_g8x_summary.json
 - measured rank;
 - rank difference.
 
+Після розширення Android benchmark-додатку CSV також містить resource metrics:
+
+- `cpu_total_ms`;
+- `cpu_per_run_ms`;
+- `cpu_wall_ratio`;
+- `pss_before_kb`;
+- `pss_after_kb`;
+- `pss_delta_kb`;
+- `java_heap_before_kb`;
+- `java_heap_after_kb`;
+- `java_heap_delta_kb`;
+- `native_heap_before_kb`;
+- `native_heap_after_kb`;
+- `native_heap_delta_kb`.
+
+Ці значення формують невеликий реальний датасет вимірювань на LG G8X ThinQ: для кожного FBNet-блоку є прогнозована latency, фактична latency, CPU usage proxy та memory usage proxy.
+
 ## Основні результати
 
 | Metric | Value |
 | --- | ---: |
-| Blocks | 24 |
-| MAE, ms | 3.6647 |
-| RMSE, ms | 4.4853 |
-| Median absolute error, ms | 3.1775 |
-| Median relative error, % | 84.10 |
-| Pearson correlation | 0.9106 |
-| Spearman rank correlation | 0.9183 |
+| Devices | 2 |
+| Rows | 48 |
+| MAE, ms | 3.2112 |
+| RMSE, ms | 4.1495 |
+| Median absolute error, ms | 2.6813 |
+| Median relative error, % | 83.47 |
+| Pearson correlation | 0.9036 |
+| Spearman rank correlation | 0.9157 |
+
+## Результати за пристроями
+
+| Device | Rows | MAE, ms | RMSE, ms | Pearson | Spearman | Median CPU/run, ms | Median PSS, KB |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| LG G8X ThinQ | 24 | 3.6738 | 4.5597 | 0.9043 | 0.9157 | 6.91 | 55124 |
+| Redmi Note 9 Pro | 24 | 2.7486 | 3.6939 | 0.9110 | 0.9322 | 5.57 | 83212.5 |
 
 ## Результати за групами
 
 | Group | Rows | Predicted median, ms | Measured median, ms | Median abs. error, ms |
 | --- | ---: | ---: | ---: | ---: |
-| fast | 8 | 0.0777 | 1.3473 | 1.2130 |
-| medium | 8 | 0.9278 | 5.9448 | 5.0971 |
-| slow | 8 | 14.1057 | 16.8496 | 3.4402 |
+| fast | 16 | 0.0777 | 0.9748 | 0.8405 |
+| medium | 16 | 0.9278 | 6.2520 | 5.3741 |
+| slow | 16 | 14.1057 | 15.3582 | 2.4676 |
 
 ## Інтерпретація Spearman correlation
 
@@ -201,20 +242,40 @@ reports/real_device_validation_lg_g8x_summary.json
 Отримане значення:
 
 ```text
-Spearman rank correlation = 0.9183
+Spearman rank correlation = 0.9157
 ```
 
-є високим. Це означає, що модель добре зберігає порядок швидших і повільніших блоків на реальному Android-пристрої.
+є високим. Це означає, що модель добре зберігає порядок швидших і повільніших блоків на реальних Android-пристроях.
 
-Водночас це не означає, що модель з точністю 91.83% вгадує latency у мілісекундах. Абсолютні значення відрізняються через різницю між benchmark-пристроєм `pixel3` і фізичним LG G8X ThinQ, а також через proxy-відтворення FBNet-блоків у TFLite.
+Водночас це не означає, що модель з точністю 91.57% вгадує latency у мілісекундах. Абсолютні значення відрізняються через різницю між benchmark-пристроєм `pixel3` і фізичними Android-смартфонами, а також через proxy-відтворення FBNet-блоків у TFLite.
 
 ## Висновок
 
-Real-device validation показала, що модель не є точним секундоміром для довільного Android-пристрою, але добре працює як інструмент попереднього ranking.
+Real-device validation на двох Android-смартфонах показала, що модель не є точним секундоміром для довільного Android-пристрою, але добре працює як інструмент попереднього ranking.
 
 Практичний висновок:
 
-- абсолютні latency на LG G8X ThinQ відрізняються від прогнозів для `pixel3`;
+- абсолютні latency на реальних Android-смартфонах відрізняються від прогнозів для `pixel3`;
 - швидкі, середні та повільні блоки логічно розділяються;
 - порядок блоків добре узгоджується з реальними вимірюваннями;
+- створено власний малий real-device dataset: 24 FBNet-блоки на 2 Android-пристроях, тобто 48 реальних вимірювань;
+- датасет містить latency, CPU time, PSS memory, Java heap і native heap;
 - модель можна використовувати для попереднього відбору FBNet-блоків перед фінальним вимірюванням на конкретному пристрої.
+
+## Власний real-device dataset
+
+Після зауваження щодо ресурсів Android benchmark-додаток було розширено: окрім latency він записує CPU time та memory metrics для кожного блоку. Після запуску на двох телефонах сформовано об'єднаний датасет:
+
+```text
+reports/real_android_fbnet_dataset.csv
+```
+
+У ньому кожен рядок відповідає запуску одного FBNet-блоку на одному фізичному Android-пристрої. Датасет містить параметри блоку, device metadata, predicted latency, measured latency, CPU usage proxy та memory usage proxy.
+
+Підсумковий файл:
+
+```text
+reports/real_android_fbnet_dataset_summary.json
+```
+
+містить загальні метрики, метрики окремо за пристроями та summary для CPU/memory usage.

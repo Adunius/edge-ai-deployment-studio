@@ -1,0 +1,139 @@
+{
+  "rows": 48,
+  "devices": [
+    "lg_g8x_thinq",
+    "redmi_note_9_pro"
+  ],
+  "device_count": 2,
+  "benchmark_device": "pixel3",
+  "mae_ms": 3.2111686458333337,
+  "rmse_ms": 4.149475561152832,
+  "median_absolute_error_ms": 2.6812725000000004,
+  "median_relative_error_percent": 83.46512032767555,
+  "pearson_correlation": 0.9035783825053516,
+  "spearman_rank_correlation": 0.9157073419980271,
+  "device_metrics": [
+    {
+      "device_id": "lg_g8x_thinq",
+      "rows": 24,
+      "mae_ms": 3.6737587916666663,
+      "rmse_ms": 4.5597483248539925,
+      "pearson_correlation": 0.9042990136961747,
+      "spearman_rank_correlation": 0.9156521739130434,
+      "median_cpu_per_run_ms": 6.91,
+      "median_pss_after_kb": 55124.0
+    },
+    {
+      "device_id": "redmi_note_9_pro",
+      "rows": 24,
+      "mae_ms": 2.7485784999999994,
+      "rmse_ms": 3.6939125705950886,
+      "pearson_correlation": 0.9109558420181014,
+      "spearman_rank_correlation": 0.9321739130434782,
+      "median_cpu_per_run_ms": 5.57,
+      "median_pss_after_kb": 83212.5
+    }
+  ],
+  "device_summary": [
+    {
+      "device_id": "lg_g8x_thinq",
+      "rows": 24,
+      "measured_median_ms": 7.2864325,
+      "cpu_per_run_median_ms": 6.91,
+      "pss_after_median_kb": 55124.0,
+      "native_heap_after_median_kb": 12713.0
+    },
+    {
+      "device_id": "redmi_note_9_pro",
+      "rows": 24,
+      "measured_median_ms": 5.216250499999999,
+      "cpu_per_run_median_ms": 5.57,
+      "pss_after_median_kb": 83212.5,
+      "native_heap_after_median_kb": 17473.5
+    }
+  ],
+  "resource_columns_available": [
+    "cpu_per_run_ms",
+    "cpu_wall_ratio",
+    "pss_after_kb",
+    "pss_delta_kb",
+    "java_heap_after_kb",
+    "java_heap_delta_kb",
+    "native_heap_after_kb",
+    "native_heap_delta_kb"
+  ],
+  "resource_summary": {
+    "cpu_per_run_ms": {
+      "mean": 8.340833333333334,
+      "median": 6.65,
+      "min": 0.66,
+      "max": 36.18
+    },
+    "cpu_wall_ratio": {
+      "mean": 1.1706269791666666,
+      "median": 1.008096,
+      "min": 0.913961,
+      "max": 3.920595
+    },
+    "pss_after_kb": {
+      "mean": 68567.45833333333,
+      "median": 69911.0,
+      "min": 45744.0,
+      "max": 90019.0
+    },
+    "pss_delta_kb": {
+      "mean": -182.6875,
+      "median": 19.0,
+      "min": -5756.0,
+      "max": 1655.0
+    },
+    "java_heap_after_kb": {
+      "mean": 4036.25,
+      "median": 3833.0,
+      "min": 1791.0,
+      "max": 6804.0
+    },
+    "java_heap_delta_kb": {
+      "mean": -37.5,
+      "median": 16.0,
+      "min": -2712.0,
+      "max": 64.0
+    },
+    "native_heap_after_kb": {
+      "mean": 16232.875,
+      "median": 16027.5,
+      "min": 10792.0,
+      "max": 26344.0
+    },
+    "native_heap_delta_kb": {
+      "mean": -4.125,
+      "median": 0.0,
+      "min": -881.0,
+      "max": 356.0
+    }
+  },
+  "latency_group_summary": [
+    {
+      "latency_group": "fast",
+      "rows": 16,
+      "predicted_median_ms": 0.077708,
+      "measured_median_ms": 0.9748185,
+      "absolute_error_median_ms": 0.8405225
+    },
+    {
+      "latency_group": "medium",
+      "rows": 16,
+      "predicted_median_ms": 0.9278485000000001,
+      "measured_median_ms": 6.2519535,
+      "absolute_error_median_ms": 5.374082
+    },
+    {
+      "latency_group": "slow",
+      "rows": 16,
+      "predicted_median_ms": 14.105679,
+      "measured_median_ms": 15.358177,
+      "absolute_error_median_ms": 2.4676229999999997
+    }
+  ],
+  "note": "The physical Android devices are not the original HW-NAS-Bench pixel3 device. This validation checks practical ranking consistency and device-side resource usage on real Android devices."
+}

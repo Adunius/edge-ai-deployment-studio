@@ -2,34 +2,94 @@
   "rows": 24,
   "benchmark_device": "pixel3",
   "real_device": "lg_g8x_thinq",
-  "mae_ms": 3.6647059583333337,
-  "rmse_ms": 4.485310006412855,
-  "median_absolute_error_ms": 3.1775010000000004,
-  "median_relative_error_percent": 84.09742447274749,
-  "pearson_correlation": 0.9105659732285466,
-  "spearman_rank_correlation": 0.9182608695652172,
+  "mae_ms": 3.6737587916666663,
+  "rmse_ms": 4.5597483248539925,
+  "median_absolute_error_ms": 2.9196515000000005,
+  "median_relative_error_percent": 86.6959699140497,
+  "pearson_correlation": 0.9042990136961747,
+  "spearman_rank_correlation": 0.9156521739130434,
+  "resource_columns_available": [
+    "cpu_per_run_ms",
+    "cpu_wall_ratio",
+    "pss_after_kb",
+    "pss_delta_kb",
+    "java_heap_after_kb",
+    "java_heap_delta_kb",
+    "native_heap_after_kb",
+    "native_heap_delta_kb"
+  ],
+  "resource_summary": {
+    "cpu_per_run_ms": {
+      "mean": 8.226666666666667,
+      "median": 6.91,
+      "min": 1.02,
+      "max": 26.08
+    },
+    "cpu_wall_ratio": {
+      "mean": 1.1697974583333333,
+      "median": 1.006367,
+      "min": 0.995568,
+      "max": 3.920595
+    },
+    "pss_after_kb": {
+      "mean": 54097.125,
+      "median": 55124.0,
+      "min": 45744.0,
+      "max": 62486.0
+    },
+    "pss_delta_kb": {
+      "mean": 61.75,
+      "median": 24.0,
+      "min": -576.0,
+      "max": 803.0
+    },
+    "java_heap_after_kb": {
+      "mean": 3188.4166666666665,
+      "median": 3027.5,
+      "min": 1791.0,
+      "max": 5160.0
+    },
+    "java_heap_delta_kb": {
+      "mean": 16.666666666666668,
+      "median": 16.0,
+      "min": 16.0,
+      "max": 32.0
+    },
+    "native_heap_after_kb": {
+      "mean": 13741.0,
+      "median": 12713.0,
+      "min": 10792.0,
+      "max": 20640.0
+    },
+    "native_heap_delta_kb": {
+      "mean": -28.875,
+      "median": 0.0,
+      "min": -881.0,
+      "max": 356.0
+    }
+  },
   "latency_group_summary": [
     {
       "latency_group": "fast",
       "rows": 8,
       "predicted_median_ms": 0.077708,
-      "measured_median_ms": 1.347331,
-      "absolute_error_median_ms": 1.213035
+      "measured_median_ms": 1.1788025,
+      "absolute_error_median_ms": 1.091035
     },
     {
       "latency_group": "medium",
       "rows": 8,
       "predicted_median_ms": 0.9278485000000001,
-      "measured_median_ms": 5.9447525,
-      "absolute_error_median_ms": 5.0970775
+      "measured_median_ms": 7.1923045000000005,
+      "absolute_error_median_ms": 6.314433
     },
     {
       "latency_group": "slow",
       "rows": 8,
       "predicted_median_ms": 14.105679,
-      "measured_median_ms": 16.849636,
-      "absolute_error_median_ms": 3.4402240000000006
+      "measured_median_ms": 17.217422499999998,
+      "absolute_error_median_ms": 2.696290500000001
     }
   ],
-  "note": "LG G8X ThinQ is not the original HW-NAS-Bench pixel3 device. This validation checks practical ranking consistency on a real Android device."
+  "note": "LG G8X ThinQ is not the original HW-NAS-Bench pixel3 device. This validation checks practical ranking consistency and device-side resource usage on a real Android device."
 }
