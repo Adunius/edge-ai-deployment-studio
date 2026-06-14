@@ -6,53 +6,61 @@
   ],
   "device_count": 2,
   "benchmark_device": "pixel3",
-  "mae_ms": 3.2111686458333337,
-  "rmse_ms": 4.149475561152832,
-  "median_absolute_error_ms": 2.6812725000000004,
-  "median_relative_error_percent": 83.46512032767555,
-  "pearson_correlation": 0.9035783825053516,
-  "spearman_rank_correlation": 0.9157073419980271,
+  "mae_ms": 5.1397064375,
+  "rmse_ms": 6.796546747532654,
+  "median_absolute_error_ms": 3.7633514999999997,
+  "median_relative_error_percent": 88.21009341619816,
+  "pearson_correlation": 0.7756896183028278,
+  "spearman_rank_correlation": 0.8470564475564194,
   "device_metrics": [
     {
       "device_id": "lg_g8x_thinq",
       "rows": 24,
-      "mae_ms": 3.6737587916666663,
-      "rmse_ms": 4.5597483248539925,
-      "pearson_correlation": 0.9042990136961747,
-      "spearman_rank_correlation": 0.9156521739130434,
-      "median_cpu_per_run_ms": 6.91,
-      "median_pss_after_kb": 55124.0
+      "mae_ms": 3.6363989166666664,
+      "rmse_ms": 4.682293503917302,
+      "pearson_correlation": 0.8627899289001963,
+      "spearman_rank_correlation": 0.9391304347826085,
+      "median_cpu_per_run_ms": 6.35,
+      "median_pss_after_kb": 52129.5
     },
     {
       "device_id": "redmi_note_9_pro",
       "rows": 24,
-      "mae_ms": 2.7485784999999994,
-      "rmse_ms": 3.6939125705950886,
-      "pearson_correlation": 0.9109558420181014,
-      "spearman_rank_correlation": 0.9321739130434782,
-      "median_cpu_per_run_ms": 5.57,
-      "median_pss_after_kb": 83212.5
+      "mae_ms": 6.643013958333333,
+      "rmse_ms": 8.394177918412689,
+      "pearson_correlation": 0.7821677446322468,
+      "spearman_rank_correlation": 0.8495652173913043,
+      "median_cpu_per_run_ms": 10.84,
+      "median_pss_after_kb": 75824.5
     }
   ],
   "device_summary": [
     {
       "device_id": "lg_g8x_thinq",
       "rows": 24,
-      "measured_median_ms": 7.2864325,
-      "cpu_per_run_median_ms": 6.91,
-      "pss_after_median_kb": 55124.0,
-      "native_heap_after_median_kb": 12713.0
+      "measured_median_ms": 7.100156500000001,
+      "cpu_per_run_median_ms": 6.35,
+      "pss_after_median_kb": 52129.5,
+      "native_heap_after_median_kb": 12213.0
     },
     {
       "device_id": "redmi_note_9_pro",
       "rows": 24,
-      "measured_median_ms": 5.216250499999999,
-      "cpu_per_run_median_ms": 5.57,
-      "pss_after_median_kb": 83212.5,
-      "native_heap_after_median_kb": 17473.5
+      "measured_median_ms": 12.782513,
+      "cpu_per_run_median_ms": 10.84,
+      "pss_after_median_kb": 75824.5,
+      "native_heap_after_median_kb": 17731.0
     }
   ],
   "resource_columns_available": [
+    "measured_mean_ms",
+    "measured_median_ms",
+    "measured_std_ms",
+    "measured_q25_ms",
+    "measured_q75_ms",
+    "measured_q90_ms",
+    "measured_min_ms",
+    "measured_max_ms",
     "cpu_per_run_ms",
     "cpu_wall_ratio",
     "pss_after_kb",
@@ -63,53 +71,165 @@
     "native_heap_delta_kb"
   ],
   "resource_summary": {
+    "measured_mean_ms": {
+      "mean": 9.352974083333335,
+      "std": 7.474864471696901,
+      "median": 8.370536,
+      "q25": 3.1031145,
+      "q75": 14.20190675,
+      "q90": 18.609157800000002,
+      "min": 0.654941,
+      "max": 32.457105
+    },
+    "measured_median_ms": {
+      "mean": 9.8111790625,
+      "std": 7.601583079722641,
+      "median": 9.212279,
+      "q25": 2.93281275,
+      "q75": 15.585599250000001,
+      "q90": 19.396609500000004,
+      "min": 0.513177,
+      "max": 32.042657
+    },
+    "measured_std_ms": {
+      "mean": 2.2135634791666665,
+      "std": 1.8773171778513464,
+      "median": 1.694674,
+      "q25": 0.69932075,
+      "q75": 2.99986525,
+      "q90": 4.552737400000001,
+      "min": 0.240017,
+      "max": 8.216591
+    },
+    "measured_q25_ms": {
+      "mean": 8.007896645833334,
+      "std": 7.085838206527371,
+      "median": 6.1916340000000005,
+      "q25": 2.341758,
+      "q75": 12.16207075,
+      "q90": 17.7378954,
+      "min": 0.366771,
+      "max": 31.748073
+    },
+    "measured_q75_ms": {
+      "mean": 10.744408291666668,
+      "std": 8.150842308826931,
+      "median": 9.6451695,
+      "q25": 3.10075175,
+      "q75": 16.56149425,
+      "q90": 22.522849000000004,
+      "min": 0.766562,
+      "max": 32.855846
+    },
+    "measured_q90_ms": {
+      "mean": 11.679501833333333,
+      "std": 8.673864652053991,
+      "median": 10.712943,
+      "q25": 3.7191730000000005,
+      "q75": 17.9378025,
+      "q90": 24.4600247,
+      "min": 0.867281,
+      "max": 34.01513
+    },
+    "measured_min_ms": {
+      "mean": 4.7484951041666665,
+      "std": 6.630619664902736,
+      "median": 1.9235155,
+      "q25": 0.66723975,
+      "q75": 5.8364192500000005,
+      "q90": 13.029375400000001,
+      "min": 0.121302,
+      "max": 29.809584
+    },
+    "measured_max_ms": {
+      "mean": 13.104398895833333,
+      "std": 9.527095347782263,
+      "median": 12.965233999999999,
+      "q25": 4.17962275,
+      "q75": 21.039805,
+      "q90": 26.044077899999998,
+      "min": 1.252864,
+      "max": 37.976407
+    },
     "cpu_per_run_ms": {
-      "mean": 8.340833333333334,
-      "median": 6.65,
-      "min": 0.66,
-      "max": 36.18
+      "mean": 10.038333333333334,
+      "std": 7.939200702930897,
+      "median": 8.280000000000001,
+      "q25": 3.705,
+      "q75": 15.195,
+      "q90": 19.25400000000001,
+      "min": 0.84,
+      "max": 32.5
     },
     "cpu_wall_ratio": {
-      "mean": 1.1706269791666666,
-      "median": 1.008096,
-      "min": 0.913961,
-      "max": 3.920595
+      "mean": 1.203981125,
+      "std": 0.5570969714412813,
+      "median": 1.0163855000000002,
+      "q25": 0.99443675,
+      "q75": 1.11531675,
+      "q90": 1.3786126000000003,
+      "min": 0.967914,
+      "max": 3.909354
     },
     "pss_after_kb": {
-      "mean": 68567.45833333333,
-      "median": 69911.0,
-      "min": 45744.0,
-      "max": 90019.0
+      "mean": 65582.33333333333,
+      "std": 12708.638863342732,
+      "median": 71006.0,
+      "q25": 52211.25,
+      "q75": 76539.0,
+      "q90": 78357.5,
+      "min": 41740.0,
+      "max": 82094.0
     },
     "pss_delta_kb": {
-      "mean": -182.6875,
-      "median": 19.0,
-      "min": -5756.0,
-      "max": 1655.0
+      "mean": -113.47916666666667,
+      "std": 1112.8196885080736,
+      "median": 20.0,
+      "q25": 5.25,
+      "q75": 46.0,
+      "q90": 108.30000000000004,
+      "min": -7505.0,
+      "max": 1464.0
     },
     "java_heap_after_kb": {
-      "mean": 4036.25,
-      "median": 3833.0,
-      "min": 1791.0,
-      "max": 6804.0
+      "mean": 4802.416666666667,
+      "std": 2667.1977472049266,
+      "median": 3983.5,
+      "q25": 2991.0,
+      "q75": 5734.25,
+      "q90": 7742.900000000003,
+      "min": 1941.0,
+      "max": 14356.0
     },
     "java_heap_delta_kb": {
-      "mean": -37.5,
+      "mean": -58.291666666666664,
+      "std": 555.5049440894306,
       "median": 16.0,
-      "min": -2712.0,
-      "max": 64.0
+      "q25": 16.0,
+      "q75": 23.75,
+      "q90": 33.20000000000002,
+      "min": -3826.0,
+      "max": 66.0
     },
     "native_heap_after_kb": {
-      "mean": 16232.875,
-      "median": 16027.5,
-      "min": 10792.0,
-      "max": 26344.0
+      "mean": 16244.6875,
+      "std": 4087.55346978496,
+      "median": 16447.0,
+      "q25": 12306.0,
+      "q75": 18553.75,
+      "q90": 21519.00000000001,
+      "min": 10656.0,
+      "max": 26200.0
     },
     "native_heap_delta_kb": {
-      "mean": -4.125,
+      "mean": -8.208333333333334,
+      "std": 172.47447647539332,
       "median": 0.0,
-      "min": -881.0,
-      "max": 356.0
+      "q25": 0.0,
+      "q75": 0.0,
+      "q90": 4.900000000000013,
+      "min": -425.0,
+      "max": 869.0
     }
   },
   "profile_feature_columns": [
@@ -122,33 +242,53 @@
   "profile_feature_summary": {
     "estimated_macs": {
       "mean": 81062784.0,
+      "std": 120837245.19647081,
       "median": 29638656.0,
+      "q25": 6348800.0,
+      "q75": 90316800.0,
+      "q90": 250478592.0,
       "min": 589824.0,
       "max": 500957184.0
     },
     "estimated_flops": {
       "mean": 162125568.0,
+      "std": 241674490.39294162,
       "median": 59277312.0,
+      "q25": 12697600.0,
+      "q75": 180633600.0,
+      "q90": 500957184.0,
       "min": 1179648.0,
       "max": 1001914368.0
     },
     "estimated_params": {
       "mean": 131908.0,
+      "std": 224778.4134286239,
       "median": 33408.0,
+      "q25": 14720.0,
+      "q75": 92992.0,
+      "q90": 549888.0,
       "min": 3200.0,
       "max": 846400.0
     },
     "measured_tops": {
-      "mean": 0.013403834696743272,
-      "median": 0.009754470016174837,
-      "min": 0.0014564490559887797,
-      "max": 0.03860375945675475
+      "mean": 0.011280244342216056,
+      "std": 0.010316040374970735,
+      "median": 0.006427605381606779,
+      "q25": 0.0041075660017762024,
+      "q75": 0.014360737490378996,
+      "q90": 0.029507352369906426,
+      "min": 0.0015761465879605258,
+      "max": 0.04014126156017899
     },
     "cpu_tops": {
-      "mean": 0.01216861936368637,
-      "median": 0.010000353687721494,
-      "min": 0.0008079780821917808,
-      "max": 0.03841696196319019
+      "mean": 0.010364204288321353,
+      "std": 0.008893810659373357,
+      "median": 0.006299743255813953,
+      "q25": 0.004157766499235641,
+      "q75": 0.012944213544129585,
+      "q90": 0.0262449011626135,
+      "min": 0.000548673488372093,
+      "max": 0.031076748387096773
     }
   },
   "prediction_model_metrics": [
@@ -157,40 +297,40 @@
       "rows": 48,
       "model": "RandomForestRegressor",
       "validation": "GroupKFold by block_id, n_splits=6",
-      "mae": 1.4145042625687836,
-      "rmse": 2.7976817163358967,
-      "mape_percent": 30.625050295956438,
-      "r2": 0.8389002893583146
+      "mae": 2.566115509610706,
+      "rmse": 3.6529998590753574,
+      "mape_percent": 37.4758014936061,
+      "r2": 0.7641506967490006
     },
     {
       "target": "cpu_per_run_ms",
       "rows": 48,
       "model": "RandomForestRegressor",
       "validation": "GroupKFold by block_id, n_splits=6",
-      "mae": 1.5682931167328051,
-      "rmse": 3.162333830257765,
-      "mape_percent": 26.154099089892018,
-      "r2": 0.8302758648095159
+      "mae": 2.352143108465607,
+      "rmse": 3.418845814845676,
+      "mape_percent": 39.66236976665632,
+      "r2": 0.81061357429069
     },
     {
       "target": "pss_after_kb",
       "rows": 48,
       "model": "RandomForestRegressor",
       "validation": "GroupKFold by block_id, n_splits=6",
-      "mae": 14470.333333333334,
-      "rmse": 14829.323499732369,
-      "mape_percent": 22.516232646236475,
-      "r2": 0.029574288882608712
+      "mae": 9802.28995684524,
+      "rmse": 10713.275158673554,
+      "mape_percent": 16.365286280783014,
+      "r2": 0.27424536030836555
     },
     {
       "target": "native_heap_after_kb",
       "rows": 48,
       "model": "RandomForestRegressor",
       "validation": "GroupKFold by block_id, n_splits=6",
-      "mae": 2497.164477678571,
-      "rmse": 2680.3729126882777,
-      "mape_percent": 16.208552082727685,
-      "r2": 0.5301020705868009
+      "mae": 2757.9375,
+      "rmse": 2928.558623322403,
+      "mape_percent": 18.1204950978039,
+      "r2": 0.47576703121801933
     }
   ],
   "profiling_references": [
@@ -210,22 +350,22 @@
       "latency_group": "fast",
       "rows": 16,
       "predicted_median_ms": 0.077708,
-      "measured_median_ms": 0.9748185,
-      "absolute_error_median_ms": 0.8405225
+      "measured_median_ms": 1.174714,
+      "absolute_error_median_ms": 1.101379
     },
     {
       "latency_group": "medium",
       "rows": 16,
       "predicted_median_ms": 0.9278485000000001,
-      "measured_median_ms": 6.2519535,
-      "absolute_error_median_ms": 5.374082
+      "measured_median_ms": 8.8691405,
+      "absolute_error_median_ms": 7.945164
     },
     {
       "latency_group": "slow",
       "rows": 16,
       "predicted_median_ms": 14.105679,
-      "measured_median_ms": 15.358177,
-      "absolute_error_median_ms": 2.4676229999999997
+      "measured_median_ms": 15.964271,
+      "absolute_error_median_ms": 3.4185209999999984
     }
   ],
   "note": "The physical Android devices are not the original HW-NAS-Bench pixel3 device. This validation checks practical ranking consistency and device-side resource usage on real Android devices."

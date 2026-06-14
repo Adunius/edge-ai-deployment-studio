@@ -1,6 +1,7 @@
 package com.example.realdevicebenchmark;
 
 import android.app.Activity;
+import android.os.Build;
 import android.os.Debug;
 import android.os.Bundle;
 import android.os.Process;
@@ -148,6 +149,10 @@ public class MainActivity extends Activity {
                     spec,
                     mean(timingsMs),
                     median(timingsMs),
+                    stddev(timingsMs),
+                    quantile(timingsMs, 0.25),
+                    quantile(timingsMs, 0.75),
+                    quantile(timingsMs, 0.90),
                     Collections.min(timingsMs),
                     Collections.max(timingsMs),
                     cpuElapsedMs,
@@ -208,10 +213,13 @@ public class MainActivity extends Activity {
     }
 
     private File writeResults(List<ResultRow> results) throws Exception {
-        File outputFile = new File(getExternalFilesDir(null), "real_device_validation_lg_g8x.csv");
+        String outputName = "real_device_validation_" + currentDeviceId() + ".csv";
+        File outputFile = new File(getExternalFilesDir(null), outputName);
         StringBuilder csv = new StringBuilder();
         csv.append("block_id,benchmark_device,real_device,latency_group,predicted_latency,")
-                .append("measured_mean_ms,measured_median_ms,measured_min_ms,measured_max_ms,")
+                .append("measured_mean_ms,measured_median_ms,measured_std_ms,")
+                .append("measured_q25_ms,measured_q75_ms,measured_q90_ms,")
+                .append("measured_min_ms,measured_max_ms,")
                 .append("cpu_total_ms,cpu_per_run_ms,cpu_wall_ratio,")
                 .append("pss_before_kb,pss_after_kb,pss_delta_kb,")
                 .append("java_heap_before_kb,java_heap_after_kb,java_heap_delta_kb,")
@@ -252,13 +260,51 @@ public class MainActivity extends Activity {
     }
 
     private static double median(List<Double> values) {
+        return quantile(values, 0.5);
+    }
+
+    private static double stddev(List<Double> values) {
+        double mean = mean(values);
+        double sumSquaredDiff = 0.0;
+        for (double value : values) {
+            double diff = value - mean;
+            sumSquaredDiff += diff * diff;
+        }
+        return Math.sqrt(sumSquaredDiff / values.size());
+    }
+
+    private static double quantile(List<Double> values, double probability) {
         List<Double> sorted = new ArrayList<>(values);
         Collections.sort(sorted);
-        int middle = sorted.size() / 2;
-        if (sorted.size() % 2 == 0) {
-            return (sorted.get(middle - 1) + sorted.get(middle)) / 2.0;
+        if (sorted.size() == 1) {
+            return sorted.get(0);
         }
-        return sorted.get(middle);
+        double position = probability * (sorted.size() - 1);
+        int lower = (int) Math.floor(position);
+        int upper = (int) Math.ceil(position);
+        if (lower == upper) {
+            return sorted.get(lower);
+        }
+        double weight = position - lower;
+        return sorted.get(lower) * (1.0 - weight) + sorted.get(upper) * weight;
+    }
+
+    private static String sanitizeFilePart(String value) {
+        String sanitized = value == null ? "android_device" : value.toLowerCase();
+        sanitized = sanitized.replaceAll("[^a-z0-9]+", "_");
+        sanitized = sanitized.replaceAll("^_+|_+$", "");
+        return sanitized.isEmpty() ? "android_device" : sanitized;
+    }
+
+    private static String currentDeviceId() {
+        String model = Build.MODEL == null ? "" : Build.MODEL.toLowerCase();
+        if (model.contains("lm-g850") || model.contains("lg g8x")) {
+            return "lg_g8x_thinq";
+        }
+        if (model.contains("redmi note 9 pro")) {
+            return "redmi_note_9_pro";
+        }
+        return sanitizeFilePart(Build.MODEL);
     }
 
     private void append(String text) {
@@ -309,6 +355,10 @@ public class MainActivity extends Activity {
         final ModelSpec spec;
         final double meanMs;
         final double medianMs;
+        final double stdMs;
+        final double q25Ms;
+        final double q75Ms;
+        final double q90Ms;
         final double minMs;
         final double maxMs;
         final long cpuTotalMs;
@@ -328,6 +378,10 @@ public class MainActivity extends Activity {
                 ModelSpec spec,
                 double meanMs,
                 double medianMs,
+                double stdMs,
+                double q25Ms,
+                double q75Ms,
+                double q90Ms,
                 double minMs,
                 double maxMs,
                 long cpuTotalMs,
@@ -346,6 +400,10 @@ public class MainActivity extends Activity {
             this.spec = spec;
             this.meanMs = meanMs;
             this.medianMs = medianMs;
+            this.stdMs = stdMs;
+            this.q25Ms = q25Ms;
+            this.q75Ms = q75Ms;
+            this.q90Ms = q90Ms;
             this.minMs = minMs;
             this.maxMs = maxMs;
             this.cpuTotalMs = cpuTotalMs;
@@ -377,11 +435,15 @@ public class MainActivity extends Activity {
                     Arrays.asList(
                             String.valueOf(spec.blockId),
                             spec.benchmarkDevice,
-                            spec.realDevice,
+                            currentDeviceId(),
                             spec.latencyGroup,
                             format(spec.predictedLatency),
                             format(meanMs),
                             format(medianMs),
+                            format(stdMs),
+                            format(q25Ms),
+                            format(q75Ms),
+                            format(q90Ms),
                             format(minMs),
                             format(maxMs),
                             String.valueOf(cpuTotalMs),

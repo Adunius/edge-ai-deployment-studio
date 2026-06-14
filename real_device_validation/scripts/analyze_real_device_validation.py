@@ -15,14 +15,31 @@ from sklearn.model_selection import GroupKFold
 EXPERIMENT_DIR = Path(__file__).resolve().parents[1]
 REPORTS_DIR = EXPERIMENT_DIR / "reports"
 DEVICE_FILES = {
-    "lg_g8x_thinq": REPORTS_DIR / "real_device_validation_lg_g8x.csv",
-    "redmi_note_9_pro": REPORTS_DIR / "real_device_validation_redmi_note_9_pro.csv",
+    "lg_g8x_thinq": [
+        REPORTS_DIR / "real_device_validation_lg_g8x_thinq.csv",
+        REPORTS_DIR / "real_device_validation_lg_g8x.csv",
+    ],
+    "redmi_note_9_pro": [
+        REPORTS_DIR / "real_device_validation_redmi_note_9_pro.csv",
+    ],
 }
 DEVICE_INFO_PATH = REPORTS_DIR / "device_info.csv"
 DATASET_PATH = REPORTS_DIR / "real_android_fbnet_dataset.csv"
 ANALYZED_PATH = REPORTS_DIR / "real_android_fbnet_dataset_analyzed.csv"
 SUMMARY_PATH = REPORTS_DIR / "real_android_fbnet_dataset_summary.json"
 PREDICTION_METRICS_PATH = REPORTS_DIR / "real_android_fbnet_prediction_metrics.csv"
+
+
+def q25(values: pd.Series) -> float:
+    return float(values.quantile(0.25))
+
+
+def q75(values: pd.Series) -> float:
+    return float(values.quantile(0.75))
+
+
+def q90(values: pd.Series) -> float:
+    return float(values.quantile(0.90))
 
 
 def add_profile_features(df: pd.DataFrame) -> pd.DataFrame:
@@ -171,9 +188,10 @@ def evaluate_prediction_models(df: pd.DataFrame) -> list[dict[str, float | str |
 
 def main() -> None:
     frames = []
-    for device_id, path in DEVICE_FILES.items():
-        if not path.exists():
-            print(f"Skipping missing validation file: {path}")
+    for device_id, paths in DEVICE_FILES.items():
+        path = next((candidate for candidate in paths if candidate.exists()), None)
+        if path is None:
+            print(f"Skipping missing validation file: {paths[0]}")
             continue
         frame = pd.read_csv(path)
         frame["device_id"] = device_id
@@ -273,6 +291,14 @@ def main() -> None:
         )
 
     resource_columns = [
+        "measured_mean_ms",
+        "measured_median_ms",
+        "measured_std_ms",
+        "measured_q25_ms",
+        "measured_q75_ms",
+        "measured_q90_ms",
+        "measured_min_ms",
+        "measured_max_ms",
         "cpu_per_run_ms",
         "cpu_wall_ratio",
         "pss_after_kb",
@@ -287,7 +313,18 @@ def main() -> None:
     if available_resource_columns:
         resource_summary = (
             df[available_resource_columns]
-            .agg(["mean", "median", "min", "max"])
+            .agg(
+                [
+                    "mean",
+                    "std",
+                    "median",
+                    q25,
+                    q75,
+                    q90,
+                    "min",
+                    "max",
+                ]
+            )
             .to_dict()
         )
 
@@ -299,7 +336,20 @@ def main() -> None:
         "cpu_tops",
     ]
     profile_summary = (
-        df[profile_columns].agg(["mean", "median", "min", "max"]).to_dict()
+        df[profile_columns]
+        .agg(
+                [
+                    "mean",
+                    "std",
+                    "median",
+                    q25,
+                    q75,
+                    q90,
+                    "min",
+                    "max",
+                ]
+            )
+        .to_dict()
     )
     prediction_metrics = evaluate_prediction_models(df)
     pd.DataFrame(prediction_metrics).to_csv(PREDICTION_METRICS_PATH, index=False)

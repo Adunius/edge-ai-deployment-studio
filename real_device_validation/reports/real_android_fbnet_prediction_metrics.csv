@@ -1,5 +1,5 @@
 target,rows,model,validation,mae,rmse,mape_percent,r2
-latency_median_ms,48,RandomForestRegressor,"GroupKFold by block_id, n_splits=6",1.4145042625687836,2.7976817163358967,30.625050295956438,0.8389002893583146
-cpu_per_run_ms,48,RandomForestRegressor,"GroupKFold by block_id, n_splits=6",1.5682931167328051,3.162333830257765,26.154099089892018,0.8302758648095159
-pss_after_kb,48,RandomForestRegressor,"GroupKFold by block_id, n_splits=6",14470.333333333334,14829.323499732369,22.516232646236475,0.029574288882608712
-native_heap_after_kb,48,RandomForestRegressor,"GroupKFold by block_id, n_splits=6",2497.164477678571,2680.3729126882777,16.208552082727685,0.5301020705868009
+latency_median_ms,48,RandomForestRegressor,"GroupKFold by block_id, n_splits=6",2.566115509610706,3.6529998590753574,37.4758014936061,0.7641506967490006
+cpu_per_run_ms,48,RandomForestRegressor,"GroupKFold by block_id, n_splits=6",2.352143108465607,3.418845814845676,39.66236976665632,0.81061357429069
+pss_after_kb,48,RandomForestRegressor,"GroupKFold by block_id, n_splits=6",9802.28995684524,10713.275158673554,16.365286280783014,0.27424536030836555
+native_heap_after_kb,48,RandomForestRegressor,"GroupKFold by block_id, n_splits=6",2757.9375,2928.558623322403,18.1204950978039,0.47576703121801933
